@@ -20,12 +20,12 @@ java {
 
 application {
     mainModule = 'com.passwordmanager'
-    mainClass = 'com.passwordmanager.PasswordManagerApplication'
+    mainClass = 'com.passwordmanager.app.PasswordManagerApplication'
 }
 
 javafx {
     version = '21.0.2'
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing']
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -37,6 +37,10 @@ tasks.named('test') {
 }
 
 dependencies {
+    implementation files('libs/scenicview.jar')
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
+    compileOnly 'org.jetbrains:annotations:26.0.2'
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
