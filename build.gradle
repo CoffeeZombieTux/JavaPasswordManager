@@ -1,0 +1,42 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+group = 'com.passwordmanager'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+
+    modularity.inferModulePath = true
+}
+
+application {
+    mainModule = 'com.passwordmanager'
+    mainClass = 'com.passwordmanager.PasswordManagerApplication'
+}
+
+javafx {
+    version = '21.0.2'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
