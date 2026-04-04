@@ -16,5 +16,9 @@ module com.passwordmanager {
     exports com.passwordmanager.storage;
 
     opens com.passwordmanager.model to com.fasterxml.jackson.databind;
-    opens com.passwordmanager.ui to javafx.fxml;
+    opens com.passwordmanager.ui.screen to javafx.fxml;
+    opens com.passwordmanager.ui.component.detail to javafx.fxml;
+    opens com.passwordmanager.ui.component.form to javafx.fxml;
+    opens com.passwordmanager.ui.component.list to javafx.fxml;
+    opens com.passwordmanager.ui.component to javafx.fxml;
 }

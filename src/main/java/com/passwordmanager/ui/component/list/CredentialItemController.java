@@ -1,4 +1,4 @@
-package com.passwordmanager.ui;
+package com.passwordmanager.ui.component.list;
 
 import com.passwordmanager.model.Credential;
 import javafx.fxml.FXML;

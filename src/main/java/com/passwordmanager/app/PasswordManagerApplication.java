@@ -14,7 +14,7 @@ public class PasswordManagerApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(
-                PasswordManagerApplication.class.getResource("/com/passwordmanager/main-view.fxml")
+                PasswordManagerApplication.class.getResource("/com/passwordmanager/ui/screen/main-view.fxml")
         );
         Scene scene = new Scene(fxmlLoader.load(), 1366, 768);
         scene.getStylesheets().add(

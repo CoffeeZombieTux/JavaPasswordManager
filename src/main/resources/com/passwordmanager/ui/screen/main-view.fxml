@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.passwordmanager.ui.screen.MainController"
+            styleClass="main-surface">
+    <top>
+        <HBox styleClass="topbar">
+            <Label text="Password Manager" styleClass="app-title"/>
+            <TextField promptText="Search passwords..." styleClass="search-field"/>
+            <Button text="+ Add" styleClass="primary-button"/>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox styleClass="sidebar">
+            <Button text="All Passwords" styleClass="nav-button active"/>
+            <Button text="Favorites" styleClass="nav-button"/>
+            <Button text="Security Checkup" styleClass="nav-button"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox styleClass="center-panel">
+            <HBox spacing="12">
+                <fx:include fx:id="recordsCount" source="../component/records-counter-view.fxml"/>
+            </HBox>
+            <fx:include fx:id="credentialList" source="../component/list/credential-list-view.fxml"/>
+        </VBox>
+    </center>
+
+    <right>
+        <StackPane minWidth="600.0">
+            <fx:include fx:id="detailView" source="../component/detail/credential-detail-view.fxml"/>
+            <fx:include fx:id="addFormView" source="../component/form/add-credential-form-view.fxml"/>
+        </StackPane>
+    </right>
+</BorderPane>
