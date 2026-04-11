@@ -9,11 +9,6 @@
             styleClass="main-surface">
     <top>
         <fx:include fx:id="topBarActions" source="../component/topbar/topbar-view.fxml"/>
-<!--        <HBox styleClass="topbar">-->
-<!--            <Label text="Password Manager" styleClass="app-title"/>-->
-<!--            <TextField promptText="Search passwords..." styleClass="search-field"/>-->
-<!--            <Button text="+ Add" styleClass="primary-button"/>-->
-<!--        </HBox>-->
     </top>
 
     <left>
