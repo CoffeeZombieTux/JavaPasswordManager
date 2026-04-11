@@ -16,6 +16,20 @@ public interface CredentialRepository {
     List<Credential> findAll();
 
     /**
+     * Returns stored credentials by category.
+     *
+     * @return unmodifiable list of credentials, never {@code null}
+     */
+    List<Credential> filterByCategory(String category);
+
+    /**
+     * Returns a list of unique categories.
+     *
+     * @return unmodifiable list of categories, never {@code null}
+     */
+    List<String> findAllCategories(String defaultCategory);
+
+    /**
      * Persists a new credential.
      *
      * @param credential the credential to add, must not be {@code null}

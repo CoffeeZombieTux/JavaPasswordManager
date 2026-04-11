@@ -36,6 +36,7 @@ public class CredentialListController {
     }
 
     public void bind(List<Credential> data) {
+        credentialListView.getSelectionModel().clearSelection();
         items.setAll(data);
     }
 

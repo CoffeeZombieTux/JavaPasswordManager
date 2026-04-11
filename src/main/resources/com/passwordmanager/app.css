@@ -646,6 +646,30 @@
 }
 
 
+/* ---------- Category List ---------- */
+.category-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d7deea;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: transparent;
+    -fx-padding: 10 14 10 14;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.category-list .list-cell:filled:hover {
+    -fx-background-color: rgba(255,255,255,0.05);
+}
+
+.category-list .list-cell:filled:selected,
+.category-list .list-cell:filled:selected:focused {
+    -fx-background-color: #4f7de2;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(91,140,255,0.22), 10, 0.15, 0, 2);
+}
+
 /* ---------- Customizations and overrides ---------- */
 
 .action-button {

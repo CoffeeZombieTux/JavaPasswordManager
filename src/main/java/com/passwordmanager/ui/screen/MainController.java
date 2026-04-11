@@ -4,20 +4,25 @@ import com.passwordmanager.model.Credential;
 import com.passwordmanager.repository.CredentialRepository;
 import com.passwordmanager.repository.FileCredentialRepository;
 import com.passwordmanager.service.CredentialService;
+import com.passwordmanager.ui.component.categories.CategoryListController;
 import com.passwordmanager.ui.component.form.AddCredentialFormController;
 import com.passwordmanager.ui.component.detail.CredentialDetailController;
 import com.passwordmanager.ui.component.list.CredentialListController;
 import com.passwordmanager.ui.component.RecordsCountController;
 import com.passwordmanager.ui.component.topbar.TopBarActionsController;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MainController {
 
     private final CredentialService credentialService;
     private List<Credential> data;
+    private String selectedCategory = CredentialService.ALL_CATEGORIES;
+    private UUID selectedCredentialId;
 
     @FXML
     private CredentialDetailController detailViewController;
@@ -33,6 +38,9 @@ public class MainController {
 
     @FXML
     private TopBarActionsController topBarActionsController;
+
+    @FXML
+    private CategoryListController categoryListController;
 
     public MainController() {
         CredentialRepository repository = new FileCredentialRepository();
@@ -55,48 +63,40 @@ public class MainController {
         detailViewController.setOnEditCallback(this::showEditSelectedForm);
         detailViewController.setOnDeleteCallback(this::onCredentialDeleted);
 
+        categoryListController.bind(this.credentialService.findAllCategories());
+        categoryListController.setCategorySelectedCallback(this::filterCredentialsByCategory);
+
         credentialListController.bind(this.data);
         credentialListController.setCredentialSelectedCallback(this::showDetails);
+        selectDefaultCredential();
+    }
 
-        if (!this.data.isEmpty()) {
-            credentialListController.select(this.data.getFirst());
-        } else {
-            showAddNewCredentialForm();
-        }
+    private void reloadData() {
+        this.data = credentialService.filterByCategory(selectedCategory);
+        credentialListController.bind(data);
+        recordsCountController.bind(data.size());
+        categoryListController.bind(credentialService.findAllCategories());
+        categoryListController.select(selectedCategory);
+        selectDefaultCredential();
     }
 
     private void onCredentialSaved(Credential saved) {
-        boolean isNew = data.stream().noneMatch(c -> c.getId().equals(saved.getId()));
-        if (isNew) {
-            data.add(saved);
-        } else {
-            data.replaceAll(c -> c.getId().equals(saved.getId()) ? saved : c);
-        }
-        credentialListController.bind(data);
-        credentialListController.select(saved);
-        recordsCountController.bind(data.size());
-        showDetails(saved);
+        this.selectedCredentialId = saved.getId();
+        reloadData();
     }
 
     private void onCredentialDeleted() {
         Credential deleted = credentialListController.getSelected();
         int index = data.indexOf(deleted);
-        Credential next = (index < data.size() - 1) ? data.get(index + 1) : null;
-        data.remove(deleted);
-        if (next == null) {
-            next = data.isEmpty() ? null : data.getFirst();
+        Credential previous = (index > 0) ? data.get(index - 1) : null;
+        if (previous != null) {
+            this.selectedCredentialId = previous.getId();
         }
-        credentialListController.bind(data);
-        recordsCountController.bind(data.size());
-        if (next == null) {
-            showAddNewCredentialForm();
-            return;
-        }
-        credentialListController.select(next);
-        showDetails(next);
+        reloadData();
     }
 
     private void showDetails(Credential selected) {
+        this.selectedCredentialId = selected.getId();
         detailViewController.bind(selected);
         addFormViewController.hide();
         detailViewController.show();
@@ -122,4 +122,33 @@ public class MainController {
             showAddNewCredentialForm();
         }
     }
+
+    private void selectDefaultCredential() {
+        if (this.selectedCredentialId != null ) {
+            Credential selectedCredential = this.data
+                    .stream()
+                    .filter(c -> c.getId().equals(this.selectedCredentialId))
+                    .findFirst()
+                    .orElse(null);
+            if (selectedCredential != null) {
+                credentialListController.select(selectedCredential);
+                return;
+            }
+        }
+        if (!this.data.isEmpty()) {
+            selectedCredentialId = this.data.getFirst().getId();
+            credentialListController.select(this.data.getFirst());
+            return;
+        }
+        selectedCredentialId = null;
+        showAddNewCredentialForm();
+    }
+
+    private void filterCredentialsByCategory(String category) {
+        if (category.equals(this.selectedCategory)) return;
+        this.selectedCategory = category;
+        reloadData();
+
+    }
+
 }

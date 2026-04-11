@@ -6,9 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class CredentialService {
+    public static final String ALL_CATEGORIES = "All";
 
     private final CredentialRepository repository;
 
@@ -23,6 +25,22 @@ public class CredentialService {
      */
     public List<Credential> findAll() {
         return repository.findAll();
+    }
+
+    public List<Credential> filterByCategory(String category) {
+        if (Objects.equals(category, ALL_CATEGORIES)) {
+            return findAll();
+        }
+        return repository.filterByCategory(category);
+    }
+
+    /**
+     * Returns a list of unique categories.
+     *
+     * @return unmodifiable list of categories, never {@code null}
+     */
+    public List<String> findAllCategories() {
+        return repository.findAllCategories(ALL_CATEGORIES);
     }
 
     /**

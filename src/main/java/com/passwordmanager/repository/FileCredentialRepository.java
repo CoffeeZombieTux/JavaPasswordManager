@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.passwordmanager.model.Credential;
+import com.passwordmanager.service.CredentialService;
 import com.passwordmanager.storage.StoragePathResolver;
 
 import java.io.IOException;
@@ -34,6 +35,25 @@ public class FileCredentialRepository implements CredentialRepository {
     @Override
     public synchronized List<Credential> findAll() {
         return List.copyOf(data);
+    }
+
+    @Override
+    public synchronized List<Credential> filterByCategory(String category) {
+        return data.stream()
+                .filter(credential -> credential.getCategory().equals(category))
+                .toList();
+    }
+
+    @Override
+    public synchronized List<String> findAllCategories(String defaultCategory) {
+        List<String> categories = new ArrayList<>(data.stream()
+                .map(Credential::getCategory)
+                .filter(c -> c != null && !c.isBlank())
+                .distinct()
+                .sorted()
+                .toList());
+        categories.addFirst(defaultCategory);
+        return List.copyOf(categories);
     }
 
     @Override

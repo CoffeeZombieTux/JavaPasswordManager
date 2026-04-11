@@ -13,9 +13,10 @@
 
     <left>
         <VBox styleClass="sidebar">
-            <Button text="All Passwords" styleClass="nav-button active"/>
-            <Button text="Favorites" styleClass="nav-button"/>
-            <Button text="Security Checkup" styleClass="nav-button"/>
+            <fx:include fx:id="categoryList" source="../component/categories/category-list-view.fxml"/>
+<!--            <Button text="All Passwords" styleClass="nav-button active"/>-->
+<!--            <Button text="Favorites" styleClass="nav-button"/>-->
+<!--            <Button text="Security Checkup" styleClass="nav-button"/>-->
         </VBox>
     </left>
 
