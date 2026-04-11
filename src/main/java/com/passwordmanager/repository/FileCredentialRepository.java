@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.passwordmanager.model.Credential;
 import com.passwordmanager.storage.StoragePathResolver;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -14,7 +15,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 public class FileCredentialRepository implements CredentialRepository {
@@ -37,14 +37,6 @@ public class FileCredentialRepository implements CredentialRepository {
     }
 
     @Override
-    public synchronized Optional<Credential> findById(UUID id) {
-        Objects.requireNonNull(id, "id must not be null");
-        return data.stream()
-                .filter(credential -> credential.getId().equals(id))
-                .findFirst();
-    }
-
-    @Override
     public synchronized Credential add(Credential credential) {
         Objects.requireNonNull(credential, "credential must not be null");
         UUID id = Objects.requireNonNull(credential.getId(), "credential.id must not be null");
@@ -60,7 +52,7 @@ public class FileCredentialRepository implements CredentialRepository {
     }
 
     @Override
-    public synchronized boolean update(Credential updated) {
+    public synchronized Credential update(Credential updated) {
         Objects.requireNonNull(updated, "updated must not be null");
         UUID id = Objects.requireNonNull(updated.getId(), "id must not be null");
 
@@ -69,21 +61,21 @@ public class FileCredentialRepository implements CredentialRepository {
             if (current.getId().equals(id)) {
                 data.set(i, updated);
                 writeToDisk(data);
-                return true;
+                return updated;
             }
         }
-        return false;
+        throw new IllegalArgumentException("Credential with id does not exists: " + id);
     }
 
     @Override
-    public synchronized boolean deleteById(UUID id) {
+    public synchronized void deleteById(UUID id) {
         Objects.requireNonNull(id, "id must not be null");
         boolean removed = data.removeIf(credential -> credential.getId().equals(id));
         if (removed) {
             writeToDisk(data);
-            return true;
+            return;
         }
-        return false;
+        throw new IllegalArgumentException("Credential with id cannot be deleted: " + id);
     }
 
     private List<Credential> loadOrCreate() {

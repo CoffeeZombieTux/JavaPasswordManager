@@ -644,3 +644,10 @@
 .success-text {
     -fx-text-fill: #35C46A;
 }
+
+
+/* ---------- Customizations and overrides ---------- */
+
+.action-button {
+    -fx-min-width: 150;
+}

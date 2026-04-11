@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Credential {
 
     private final UUID id;
-    private final String title;
+    private final String name;
     private final String username;
     private final String password;
     private final String website;
@@ -22,7 +22,7 @@ public class Credential {
     @JsonCreator
     public Credential(
             @JsonProperty("id") UUID id,
-            @JsonProperty("title") String title,
+            @JsonProperty("name") String name,
             @JsonProperty("username") String username,
             @JsonProperty("password") String password,
             @JsonProperty("website") String website,
@@ -32,7 +32,7 @@ public class Credential {
             @JsonProperty("updatedAt") Instant updatedAt
     ) {
         this.id = id;
-        this.title = title;
+        this.name = name;
         this.username = username;
         this.password = password;
         this.website = website;
@@ -46,8 +46,8 @@ public class Credential {
         return id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
     public String getUsername() {

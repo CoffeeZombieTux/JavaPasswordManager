@@ -7,9 +7,37 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CredentialRepository {
+
+    /**
+     * Returns all stored credentials.
+     *
+     * @return unmodifiable list of credentials, never {@code null}
+     */
     List<Credential> findAll();
-    Optional<Credential> findById(UUID id);
+
+    /**
+     * Persists a new credential.
+     *
+     * @param credential the credential to add, must not be {@code null}
+     * @return the added credential
+     * @throws IllegalArgumentException if a credential with the same id already exists
+     */
     Credential add(Credential credential);
-    boolean update(Credential credential);
-    boolean deleteById(UUID id);
+
+    /**
+     * Updates an existing credential.
+     *
+     * @param credential the credential to update, must not be {@code null}
+     * @return the updated credential
+     * @throws IllegalArgumentException if no credential with the given id exists
+     */
+    Credential update(Credential credential);
+
+    /**
+     * Deletes the credential with the given id.
+     *
+     * @param id the id of the credential to delete, must not be {@code null}
+     * @throws IllegalArgumentException if no credential with the given id exists
+     */
+    void deleteById(UUID id);
 }

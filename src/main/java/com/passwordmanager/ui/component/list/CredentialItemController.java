@@ -2,8 +2,8 @@ package com.passwordmanager.ui.component.list;
 
 import com.passwordmanager.model.Credential;
 import javafx.fxml.FXML;
-import javafx.scene.layout.HBox;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 
 public class CredentialItemController {
 
@@ -17,7 +17,7 @@ public class CredentialItemController {
     private Label usernameLabel;
 
     public void bind(Credential credential) {
-        titleLabel.setText(credential.getTitle());
+        titleLabel.setText(credential.getName());
         usernameLabel.setText(credential.getUsername());
     }
 

@@ -2,6 +2,7 @@ package com.passwordmanager.ui.component.list;
 
 import com.passwordmanager.model.Credential;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -14,33 +15,40 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class CredentialListController {
+
     @FXML
     private ListView<Credential> credentialListView;
+    private final ObservableList<Credential> items = FXCollections.observableArrayList();
 
-    private Consumer<Credential> onCredentialSelected = credential -> {};
+    private Consumer<Credential> credentialSelectedCallback = credential -> {};
 
     @FXML
     private void initialize() {
+        credentialListView.setItems(items);
+        credentialListView.setCellFactory(list -> new CredentialListCell());
         credentialListView.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldValue, selected) -> {
                     if (selected != null) {
-                        onCredentialSelected.accept(selected);
+                        credentialSelectedCallback.accept(selected);
                     }
                  }
         );
     }
 
     public void bind(List<Credential> data) {
-        credentialListView.setItems(FXCollections.observableArrayList(data));
-        credentialListView.setCellFactory(list -> new CredentialListCell());
-    }
-
-    public void setOnCredentialSelected(Consumer<Credential> onCredentialSelected) {
-        this.onCredentialSelected = Objects.requireNonNull(onCredentialSelected);
+        items.setAll(data);
     }
 
     public void select(Credential credential) {
         credentialListView.getSelectionModel().select(credential);
+    }
+
+    public Credential getSelected() {
+        return credentialListView.getSelectionModel().getSelectedItem();
+    }
+
+    public void setCredentialSelectedCallback(Consumer<Credential> credentialSelectedCallback) {
+        this.credentialSelectedCallback = Objects.requireNonNull(credentialSelectedCallback);
     }
 
     private static class CredentialListCell extends ListCell<Credential> {
@@ -51,7 +59,9 @@ public class CredentialListController {
         private CredentialListCell() {
             try {
                 FXMLLoader loader = new FXMLLoader(
-                        CredentialListController.class.getResource("/com/passwordmanager/ui/component/list/credential-item.fxml")
+                        CredentialListController.class.getResource(
+                                "/com/passwordmanager/ui/component/list/credential-item.fxml"
+                        )
                 );
                 view = loader.load();
                 controller = loader.getController();

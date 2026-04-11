@@ -26,7 +26,7 @@ public class PasswordManagerApplication extends Application {
         stage.setMinWidth(1366);
         stage.setMinHeight(768);
         stage.show();
-        ScenicView.show(scene);
+//        ScenicView.show(scene);
     }
 
     public static void main(String[] args) {
