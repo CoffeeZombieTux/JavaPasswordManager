@@ -4,11 +4,14 @@ import com.passwordmanager.model.Credential;
 import com.passwordmanager.service.CredentialService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CredentialDetailController {
@@ -75,8 +78,21 @@ public class CredentialDetailController {
     }
 
     public void handleDeleteCredential(ActionEvent actionEvent) {
-        this.credentialService.delete(id);
-        this.onDeleteCallback.run();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete credential");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure you want to delete this credential?");
+        alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+        alert.initOwner(detailPane.getScene().getWindow());
+        alert.initModality(javafx.stage.Modality.WINDOW_MODAL);
+        alert.getDialogPane().getStylesheets().add(
+                Objects.requireNonNull(getClass().getResource("/com/passwordmanager/app.css")).toExternalForm()
+        );
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+            this.credentialService.delete(id);
+            this.onDeleteCallback.run();
+        }
     }
 
     public void setOnEditCallback(Runnable onEditCallback) {
