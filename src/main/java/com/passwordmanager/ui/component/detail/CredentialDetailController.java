@@ -8,6 +8,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +36,9 @@ public class CredentialDetailController {
     @FXML
     private Label category;
     @FXML
-    private Label notes;
+    private Text notes;
+    @FXML
+    private GridPane fieldsGrid;
     @FXML
     private Label createdAt;
     @FXML
@@ -51,6 +55,12 @@ public class CredentialDetailController {
 
     private CredentialService credentialService;
     private PasswordState passwordState;
+
+    @FXML
+    public void initialize() {
+        // column 0 is 110px, hgap is 16px
+        notes.wrappingWidthProperty().bind(fieldsGrid.widthProperty().subtract(110 + 16));
+    }
 
     public void setCredentialService(CredentialService credentialService) {
         this.credentialService = credentialService;

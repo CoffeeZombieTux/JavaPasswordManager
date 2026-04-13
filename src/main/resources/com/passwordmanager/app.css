@@ -259,6 +259,10 @@
 }
 
 /* ---------- Summary Cards ---------- */
+.stat-cards-container {
+    -fx-padding: 0 0 16 0;
+}
+
 .stat-card {
     -fx-background-color: #202938;
     -fx-background-radius: 16;
@@ -420,6 +424,11 @@
     -fx-effect: dropshadow(gaussian, rgba(91,140,255,0.18), 12, 0.2, 0, 0);
 }
 
+.text-area > .scroll-pane,
+.text-area > .scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
 .text-area .content {
     -fx-background-color: transparent;
     -fx-background-radius: 12;
@@ -512,6 +521,7 @@
 .scroll-bar:vertical,
 .scroll-bar:horizontal {
     -fx-background-color: transparent;
+    -fx-padding: 0 0 0 10;
 }
 
 .scroll-bar .track {
@@ -668,8 +678,34 @@
     -fx-effect: dropshadow(gaussian, rgba(91,140,255,0.22), 10, 0.15, 0, 2);
 }
 
+/* Notes Text node in detail panel */
+.notes-text {
+    -fx-fill: #f5f7fa;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
 /* ---------- Customizations and overrides ---------- */
 
 .action-button {
     -fx-min-width: 150;
 }
+
+/* TextArea in forms inherits .text-area background but needs .content fixed */
+.text-area.detail-value {
+    -fx-background-color: #101723;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255,255,255,0.08);
+    -fx-border-radius: 12;
+}
+
+.text-area.detail-value > .scroll-pane,
+.text-area.detail-value > .scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.text-area.detail-value .content {
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+}
+

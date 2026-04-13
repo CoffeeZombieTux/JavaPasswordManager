@@ -14,18 +14,15 @@
     <left>
         <VBox styleClass="sidebar">
             <fx:include fx:id="categoryList" source="../component/categories/category-list-view.fxml"/>
-<!--            <Button text="All Passwords" styleClass="nav-button active"/>-->
-<!--            <Button text="Favorites" styleClass="nav-button"/>-->
-<!--            <Button text="Security Checkup" styleClass="nav-button"/>-->
         </VBox>
     </left>
 
     <center>
         <VBox styleClass="center-panel">
-            <HBox spacing="12">
+            <HBox spacing="12" styleClass="stat-cards-container">
                 <fx:include fx:id="recordsCount" source="../component/records-counter-view.fxml"/>
             </HBox>
-            <fx:include fx:id="credentialList" source="../component/list/credential-list-view.fxml"/>
+            <fx:include fx:id="credentialList" source="../component/list/credential-list-view.fxml" VBox.vgrow="ALWAYS"/>
         </VBox>
     </center>
 

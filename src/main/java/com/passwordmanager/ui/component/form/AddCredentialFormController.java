@@ -5,6 +5,7 @@ import com.passwordmanager.service.CredentialService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
@@ -27,7 +28,7 @@ public class AddCredentialFormController {
     @FXML
     private TextField category;
     @FXML
-    private TextField notes;
+    private TextArea notes;
     @FXML
     private VBox addFormPane;
 
