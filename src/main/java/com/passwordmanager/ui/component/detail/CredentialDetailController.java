@@ -11,6 +11,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -85,6 +88,8 @@ public class CredentialDetailController {
     }
 
     public void handleCopyPassword(ActionEvent actionEvent) {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(new StringSelection(passwordState.getValue()), null);
     }
 
     public void handleEditCredential(ActionEvent actionEvent) {
@@ -133,9 +138,14 @@ public class CredentialDetailController {
             return visible ? value : "*".repeat(value.length());
         }
 
+        public String getValue() {
+            return value;
+        }
+
         public boolean isVisible() {
             return visible;
         }
+
     }
 
 }
