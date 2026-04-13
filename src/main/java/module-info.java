@@ -8,6 +8,7 @@ module com.passwordmanager {
     requires javafx.swing;
     requires org.scenicview.scenicview;
     requires static org.jetbrains.annotations;
+    requires java.sql;
 
     exports com.passwordmanager.app;
     exports com.passwordmanager.model;

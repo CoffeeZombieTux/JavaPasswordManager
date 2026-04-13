@@ -5,6 +5,7 @@ import com.passwordmanager.service.CredentialService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -15,6 +16,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class CredentialDetailController {
+
+    private static final String SHOW_PASSWORD_LABEL = "Show password";
+    private static final String HIDE_PASSWORD_LABEL = "Hide password";
+
     @FXML
     private Label name;
     @FXML
@@ -33,6 +38,8 @@ public class CredentialDetailController {
     private Label updatedAt;
     @FXML
     private VBox detailPane;
+    @FXML
+    private Button showPasswordButton;
 
     private UUID id;
 
@@ -40,6 +47,7 @@ public class CredentialDetailController {
     private Runnable onDeleteCallback = () -> {};
 
     private CredentialService credentialService;
+    private PasswordState passwordState;
 
     public void setCredentialService(CredentialService credentialService) {
         this.credentialService = credentialService;
@@ -47,14 +55,17 @@ public class CredentialDetailController {
 
     public void bind(@NotNull Credential credential) {
         this.id = credential.getId();
+        passwordState = new PasswordState(credential.getPassword());
+
         name.setText(credential.getName());
         username.setText(credential.getUsername());
-        password.setText(credential.getPassword());
+        password.setText(passwordState.getDisplayValue());
         website.setText(credential.getWebsite());
         category.setText(credential.getCategory());
         notes.setText(credential.getNotes());
         createdAt.setText(credential.getCreatedAt().toString());
         updatedAt.setText(credential.getUpdatedAt().toString());
+        showPasswordButton.setText(passwordState.isVisible() ? HIDE_PASSWORD_LABEL : SHOW_PASSWORD_LABEL);
     }
 
     public void show() {
@@ -68,6 +79,9 @@ public class CredentialDetailController {
     }
 
     public void handleShowPassword(ActionEvent actionEvent) {
+        passwordState.toggle();
+        password.setText(passwordState.getDisplayValue());
+        showPasswordButton.setText(passwordState.isVisible() ? HIDE_PASSWORD_LABEL : SHOW_PASSWORD_LABEL);
     }
 
     public void handleCopyPassword(ActionEvent actionEvent) {
@@ -102,4 +116,26 @@ public class CredentialDetailController {
     public void setOnDeleteCallback(Runnable onDeleteCallback) {
         this.onDeleteCallback = Objects.requireNonNull(onDeleteCallback);
     }
+
+    private static class PasswordState {
+        private final String value;
+        private boolean visible = false;
+
+        PasswordState(String value) {
+            this.value = value;
+        }
+
+        void toggle() {
+            visible = !visible;
+        }
+
+        String getDisplayValue() {
+            return visible ? value : "*".repeat(value.length());
+        }
+
+        public boolean isVisible() {
+            return visible;
+        }
+    }
+
 }
