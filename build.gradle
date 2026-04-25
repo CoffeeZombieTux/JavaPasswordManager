@@ -1,10 +1,11 @@
 plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'org.beryx.jlink' version '3.1.1'
 }
 
 group = 'com.passwordmanager'
-version = '1.0-SNAPSHOT'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -26,6 +27,23 @@ application {
 javafx {
     version = '21.0.2'
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.web', 'javafx.swing']
+}
+
+jlink {
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages']
+    launcher {
+        name = 'PasswordManager'
+    }
+    jpackage {
+        installerType = 'deb'
+        vendor = 'CoffeeZombieTux'
+        icon = 'src/main/resources/com/passwordmanager/icon.png'
+        installerOptions = [
+            '--description', 'A simple encrypted password manager',
+            '--linux-menu-group', 'Utility',
+            '--linux-shortcut'
+        ]
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {

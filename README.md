@@ -20,6 +20,57 @@ A desktop password manager built with JavaFX 21. Credentials are encrypted with 
 ./gradlew test
 ```
 
+## Building a .deb Installer (Ubuntu / Debian)
+
+The build produces a `.deb` package that bundles its own JRE — users do not need Java installed.
+
+**Prerequisites (build machine only):**
+
+The packaging toolchain (`jlink` + `jpackage`) requires Java 21. If you use SDKMAN (recommended), install and activate it once:
+
+```bash
+sdk install java 21.0.11-tem
+sdk env   # activates Java 21 for this project directory
+```
+
+Also install the native packaging tools:
+
+```bash
+sudo apt install fakeroot binutils
+```
+
+**Build:**
+
+```bash
+./gradlew jpackage
+```
+
+The installer is written to `build/jpackage/`:
+
+```
+build/jpackage/passwordmanager_1.0.0_amd64.deb
+```
+
+**Install on any Ubuntu / Debian machine:**
+
+```bash
+sudo dpkg -i build/jpackage/passwordmanager_1.0.0_amd64.deb
+```
+
+The app will appear in the application menu under **Utilities** and can also be launched from a terminal:
+
+```bash
+PasswordManager
+```
+
+**Uninstall:**
+
+```bash
+sudo dpkg -r passwordmanager
+```
+
+---
+
 ## First Run
 
 On first launch you will be prompted to create a master password (minimum 8 characters). This password encrypts the vault — it cannot be recovered if lost.
