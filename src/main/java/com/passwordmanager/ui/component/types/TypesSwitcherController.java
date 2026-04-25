@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -16,6 +17,12 @@ public class TypesSwitcherController {
     private static final Credential.CredentialType TOKEN = Credential.CredentialType.TOKEN;
     private static final Credential.CredentialType NOTE = Credential.CredentialType.NOTE;
 
+    @FXML
+    private VBox accountCard;
+    @FXML
+    private VBox tokenCard;
+    @FXML
+    private VBox noteCard;
     @FXML
     private Label accountsTotalCount;
     @FXML
@@ -36,6 +43,14 @@ public class TypesSwitcherController {
         accountsTotalCount.setText(Integer.toString(totals.get(ACCOUNT)));
         tokensTotalCount.setText(Integer.toString(totals.get(TOKEN)));
         notesCountLabel.setText(Integer.toString(totals.get(NOTE)));
+    }
+
+    public void select(Credential.CredentialType type) {
+        List<VBox> cards = List.of(accountCard, tokenCard, noteCard);
+        cards.forEach(c -> c.getStyleClass().remove("selected"));
+        if (type == ACCOUNT) accountCard.getStyleClass().add("selected");
+        else if (type == TOKEN) tokenCard.getStyleClass().add("selected");
+        else if (type == NOTE) noteCard.getStyleClass().add("selected");
     }
 
     public void setTypeSelectedCallback(Consumer<Credential.CredentialType> typeSelectedCallback) {

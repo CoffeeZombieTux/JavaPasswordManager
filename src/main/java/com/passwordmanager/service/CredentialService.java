@@ -40,8 +40,10 @@ public class CredentialService {
      *
      * @return unmodifiable list of categories, never {@code null}
      */
-    public List<String> getCategories(List<Credential>data) {
+    public List<String> getCategories(CredentialFilter filter) {
+        List<Credential> data = repository.filter(new CredentialFilter(filter.getSearchInput()));
         List<String> categories = new ArrayList<>(data.stream()
+                .filter(credential -> credential.getType().equals(filter.getType()))
                 .map(Credential::getCategory)
                 .filter(category -> category != null && !category.isBlank())
                 .distinct()

@@ -84,7 +84,8 @@ public class MainController {
         data = credentialService.getFilteredData(credentialFilter);
         credentialListController.bind(data);
         typesSwitcherController.bind(credentialService.getTotals(credentialFilter));
-        categoryListController.bind(credentialService.getCategories(data));
+        typesSwitcherController.select(credentialFilter.getType());
+        categoryListController.bind(credentialService.getCategories(credentialFilter));
         categoryListController.select(credentialFilter.getCategory());
         selectDefaultCredential();
     }
@@ -166,7 +167,11 @@ public class MainController {
     }
 
     private void searchCredentials(String search) {
-        credentialFilter = new CredentialFilter(search);
+        credentialFilter = new CredentialFilter(
+                search,
+                CredentialService.ALL_CATEGORIES,
+                Credential.CredentialType.ACCOUNT
+        );
         reloadData();
     }
 }

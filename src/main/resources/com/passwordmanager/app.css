@@ -289,6 +289,12 @@
     -fx-border-radius: 16;
     -fx-padding: 14 16 14 16;
     -fx-spacing: 6;
+    -fx-cursor: hand;
+}
+
+.stat-card.selected {
+    -fx-background-color: #5b8cff;
+    -fx-border-color: #5b8cff;
 }
 
 .stat-value {
@@ -298,13 +304,13 @@
 }
 
 .stat-label {
-    -fx-text-fill: #a8b3c2;
+    -fx-text-fill: #f5f7fa;
     -fx-font-size: 13px;
     -fx-font-weight: 600;
 }
 
 .stat-warning .stat-value {
-    -fx-text-fill: #F2B94B;
+    -fx-text-fill: #f5f7fa;
 }
 
 .stat-danger .stat-value {

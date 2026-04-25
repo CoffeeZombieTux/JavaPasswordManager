@@ -22,6 +22,12 @@ public class CredentialFilter {
         this.searchInput = searchInput;
     }
 
+    public CredentialFilter(@Nullable String searchInput, @Nullable String category, Credential.CredentialType type) {
+        this.type = type;
+        this.category = category;
+        this.searchInput = searchInput;
+    }
+
     public @Nullable String getCategory() {
         return category;
     }

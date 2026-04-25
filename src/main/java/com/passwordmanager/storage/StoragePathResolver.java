@@ -5,7 +5,7 @@ import java.nio.file.Path;
 public final class StoragePathResolver {
 
     private static final String APP_DIR_NAME = "PasswordManager";
-    private static final String FILE_NAME = "credentials.json";
+    private static final String FILE_NAME = "credentials.vault";
 
     private StoragePathResolver() {
     }
