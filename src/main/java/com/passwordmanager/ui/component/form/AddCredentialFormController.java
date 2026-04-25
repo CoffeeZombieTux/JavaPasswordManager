@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class AddCredentialFormController {
+
     @FXML
     private Label title;
     @FXML
@@ -39,40 +40,39 @@ public class AddCredentialFormController {
     private HBox typeGroupContainer;
     @FXML
     private ToggleGroup typeGroup;
-    @FXML
-    private void initialize() {
-        typeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                this.switchType();
-                this.bind();
-            }
-        });
-    }
 
-    Credential.CredentialType selectedType;
+    private Credential.CredentialType selectedType;
+    private Credential editingCredential;
+    private CredentialService credentialService;
 
     private Runnable cancelButtonCallback = () -> {};
     private Consumer<Credential> onSavedCallback = credential -> {};
 
-    private Credential editingCredential;
-
-    private CredentialService credentialService;
+    @FXML
+    private void initialize() {
+        typeGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                switchType();
+                bind();
+            }
+        });
+    }
 
     public void bind() {
-        this.editingCredential = null;
-        this.reset();
-        this.switchType();
-        title.setText("Add new " + this.selectedType);
-        this.bindSelectedTypeForm();
+        editingCredential = null;
+        reset();
+        switchType();
+        title.setText("Add new " + selectedType);
+        bindSelectedTypeForm();
     }
 
     public void bind(Credential credential) {
-        this.editingCredential = credential;
-        this.reset();
-        this.typeGroupContainer.setVisible(false);
-        this.typeGroupContainer.setManaged(false);
-        this.selectedType = credential.getType();
-        this.bindSelectedTypeForm();
+        editingCredential = credential;
+        reset();
+        typeGroupContainer.setVisible(false);
+        typeGroupContainer.setManaged(false);
+        selectedType = credential.getType();
+        bindSelectedTypeForm();
         title.setText(credential.getName() + " (Edit)");
         name.setText(credential.getName());
         username.setText(credential.getUsername());
@@ -89,14 +89,14 @@ public class AddCredentialFormController {
         website.clear();
         category.clear();
         notes.clear();
-        this.typeGroupContainer.setVisible(true);
-        this.typeGroupContainer.setManaged(true);
-        this.usernameRow.setVisible(true);
-        this.usernameRow.setManaged(true);
-        this.passwordRow.setVisible(true);
-        this.passwordRow.setManaged(true);
-        this.websiteRow.setVisible(true);
-        this.websiteRow.setManaged(true);
+        typeGroupContainer.setVisible(true);
+        typeGroupContainer.setManaged(true);
+        usernameRow.setVisible(true);
+        usernameRow.setManaged(true);
+        passwordRow.setVisible(true);
+        passwordRow.setManaged(true);
+        websiteRow.setVisible(true);
+        websiteRow.setManaged(true);
         Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
         passwordLabel.setText("Password:");
     }
@@ -111,6 +111,7 @@ public class AddCredentialFormController {
         addFormPane.setManaged(false);
     }
 
+    @FXML
     public void handleSaveCredential(ActionEvent actionEvent) {
         UUID id = editingCredential != null ? editingCredential.getId() : null;
 
@@ -138,9 +139,10 @@ public class AddCredentialFormController {
         }
     }
 
+    @FXML
     public void handleCancelEditing(ActionEvent actionEvent) {
-        this.editingCredential = null;
-        this.reset();
+        editingCredential = null;
+        reset();
         cancelButtonCallback.run();
     }
 
@@ -157,35 +159,35 @@ public class AddCredentialFormController {
     }
 
     private void switchType() {
-        this.selectedType = Credential.CredentialType.valueOf(
+        selectedType = Credential.CredentialType.valueOf(
                 (String) typeGroup.getSelectedToggle().getUserData()
         );
     }
 
     private void bindSelectedTypeForm() {
-        switch (this.selectedType) {
+        switch (selectedType) {
             case TOKEN:
-                this.bindTokenForm();
+                bindTokenForm();
                 break;
             case NOTE:
-                this.bindNoteForm();
+                bindNoteForm();
                 break;
         }
     }
 
     private void bindTokenForm() {
-        this.usernameRow.setVisible(false);
-        this.usernameRow.setManaged(false);
+        usernameRow.setVisible(false);
+        usernameRow.setManaged(false);
         Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
         passwordLabel.setText("Token:");
     }
 
     private void bindNoteForm() {
-        this.usernameRow.setVisible(false);
-        this.usernameRow.setManaged(false);
-        this.passwordRow.setVisible(false);
-        this.passwordRow.setManaged(false);
-        this.websiteRow.setVisible(false);
-        this.websiteRow.setManaged(false);
+        usernameRow.setVisible(false);
+        usernameRow.setManaged(false);
+        passwordRow.setVisible(false);
+        passwordRow.setManaged(false);
+        websiteRow.setVisible(false);
+        websiteRow.setManaged(false);
     }
 }

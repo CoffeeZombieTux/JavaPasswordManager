@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.passwordmanager.model.Credential;
+import com.passwordmanager.model.CredentialFilter;
 import com.passwordmanager.storage.StoragePathResolver;
 
 import java.io.IOException;
@@ -24,44 +25,20 @@ public class FileCredentialRepository implements CredentialRepository {
     private final List<Credential> data;
 
     public FileCredentialRepository() {
-        this.filePath = StoragePathResolver.credentialsFilePath();
-        this.objectMapper = new ObjectMapper()
+        filePath = StoragePathResolver.credentialsFilePath();
+        objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        this.data = new ArrayList<>(loadOrCreate());
+        data = new ArrayList<>(loadOrCreate());
     }
 
     @Override
-    public synchronized List<Credential> findAll() {
-        return List.copyOf(data);
-    }
-
-    @Override
-    public synchronized List<Credential> findAll(Credential.CredentialType type) {
+    public synchronized List<Credential> filter(CredentialFilter filters) {
         return data.stream()
-                .filter(credential -> credential.getType().equals(type))
+                .filter(c -> matchesSearch(c, filters.getSearchInput()))
+                .filter(c -> filters.getType() == null || c.getType() == filters.getType())
+                .filter(c -> matchesCategory(c, filters.getCategory()))
                 .toList();
-    }
-
-    @Override
-    public synchronized List<Credential> filterByCategoryAndType(Credential.CredentialType type, String category) {
-        return data.stream()
-                .filter(credential -> credential.getType().equals(type))
-                .filter(credential -> credential.getCategory().equals(category))
-                .toList();
-    }
-
-    @Override
-    public synchronized List<String> findAllCategories(Credential.CredentialType type, String defaultCategory) {
-        List<String> categories = new ArrayList<>(data.stream()
-                .filter(credential -> credential.getType().equals(type))
-                .map(Credential::getCategory)
-                .filter(category -> category != null && !category.isBlank())
-                .distinct()
-                .sorted()
-                .toList());
-        categories.addFirst(defaultCategory);
-        return List.copyOf(categories);
     }
 
     @Override
@@ -92,7 +69,7 @@ public class FileCredentialRepository implements CredentialRepository {
                 return updated;
             }
         }
-        throw new IllegalArgumentException("Credential with id does not exists: " + id);
+        throw new IllegalArgumentException("Credential with id does not exist: " + id);
     }
 
     @Override
@@ -104,6 +81,21 @@ public class FileCredentialRepository implements CredentialRepository {
             return;
         }
         throw new IllegalArgumentException("Credential with id cannot be deleted: " + id);
+    }
+
+    private boolean matchesSearch(Credential c, String search) {
+        if (search == null || search.isBlank()) return true;
+        String q = search.toLowerCase();
+        if (c.getName().toLowerCase().contains(q)) return true;
+        if (c.getUsername() != null && c.getUsername().toLowerCase().contains(q)) return true;
+        if (c.getWebsite() != null && c.getWebsite().toLowerCase().contains(q)) return true;
+        return c.getNotes() != null && c.getNotes().toLowerCase().contains(q);
+    }
+
+    private boolean matchesCategory(Credential c, String category) {
+        if (category == null || category.isBlank() || category.equals(CredentialFilter.ALL_CATEGORIES)) return true;
+        if (c.getCategory() == null || c.getCategory().isBlank()) return false;
+        return c.getCategory().equals(category);
     }
 
     private List<Credential> loadOrCreate() {

@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +35,9 @@ public class CredentialDetailController {
     private static final String COPY_TOKEN_LABEL = "Copy token";
     private static final String PASSWORD_LABEL = "Password";
     private static final String TOKEN_LABEL = "Token";
+
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("MMM d, yyyy  HH:mm").withZone(ZoneId.systemDefault());
 
     @FXML
     private Label name;
@@ -66,12 +71,11 @@ public class CredentialDetailController {
     private Button copyPasswordButton;
 
     private UUID id;
+    private CredentialService credentialService;
+    private PasswordState passwordState;
 
     private Runnable onEditCallback = () -> {};
     private Runnable onDeleteCallback = () -> {};
-
-    private CredentialService credentialService;
-    private PasswordState passwordState;
 
     @FXML
     public void initialize() {
@@ -83,18 +87,26 @@ public class CredentialDetailController {
         this.credentialService = credentialService;
     }
 
+    public void setOnEditCallback(Runnable onEditCallback) {
+        this.onEditCallback = Objects.requireNonNull(onEditCallback);
+    }
+
+    public void setOnDeleteCallback(Runnable onDeleteCallback) {
+        this.onDeleteCallback = Objects.requireNonNull(onDeleteCallback);
+    }
+
     public void bind(@NotNull Credential credential) {
-        this.id = credential.getId();
+        id = credential.getId();
         passwordState = new PasswordState(credential.getPassword());
-        this.bindSelectedTypeForm(credential.getType());
+        bindSelectedTypeForm(credential.getType());
         name.setText(credential.getName());
         username.setText(credential.getUsername());
         password.setText(passwordState.getDisplayValue());
         website.setText(credential.getWebsite());
         category.setText(credential.getCategory());
         notes.setText(credential.getNotes());
-        createdAt.setText(credential.getCreatedAt().toString());
-        updatedAt.setText(credential.getUpdatedAt().toString());
+        createdAt.setText(DATE_FORMATTER.format(credential.getCreatedAt()));
+        updatedAt.setText(DATE_FORMATTER.format(credential.getUpdatedAt()));
     }
 
     public void show() {
@@ -107,21 +119,25 @@ public class CredentialDetailController {
         detailPane.setManaged(false);
     }
 
+    @FXML
     public void handleShowPassword(ActionEvent actionEvent) {
         passwordState.toggle();
         password.setText(passwordState.getDisplayValue());
         showPasswordButton.setText(passwordState.isVisible() ? HIDE_PASSWORD_LABEL : SHOW_PASSWORD_LABEL);
     }
 
+    @FXML
     public void handleCopyPassword(ActionEvent actionEvent) {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(new StringSelection(passwordState.getValue()), null);
     }
 
+    @FXML
     public void handleEditCredential(ActionEvent actionEvent) {
-        this.onEditCallback.run();
+        onEditCallback.run();
     }
 
+    @FXML
     public void handleDeleteCredential(ActionEvent actionEvent) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete credential");
@@ -135,67 +151,60 @@ public class CredentialDetailController {
         );
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.YES) {
-            this.credentialService.delete(id);
-            this.onDeleteCallback.run();
+            credentialService.delete(id);
+            onDeleteCallback.run();
         }
     }
 
-    public void setOnEditCallback(Runnable onEditCallback) {
-        this.onEditCallback = Objects.requireNonNull(onEditCallback);
-    }
-
-    public void setOnDeleteCallback(Runnable onDeleteCallback) {
-        this.onDeleteCallback = Objects.requireNonNull(onDeleteCallback);
-    }
     private void bindSelectedTypeForm(Credential.CredentialType type) {
-        this.resetDetail();
+        resetDetail();
         switch (type) {
             case TOKEN:
-                this.bindTokenDetail();
+                bindTokenDetail();
                 break;
             case NOTE:
-                this.bindNoteDetail();
+                bindNoteDetail();
                 break;
         }
     }
+
     private void resetDetail() {
         Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
         passwordLabel.setText(PASSWORD_LABEL + ":");
-        this.usernameRow.setVisible(true);
-        this.usernameRow.setManaged(true);
-        this.passwordRow.setVisible(true);
-        this.passwordRow.setManaged(true);
-        this.websiteRow.setVisible(true);
-        this.websiteRow.setManaged(true);
+        usernameRow.setVisible(true);
+        usernameRow.setManaged(true);
+        passwordRow.setVisible(true);
+        passwordRow.setManaged(true);
+        websiteRow.setVisible(true);
+        websiteRow.setManaged(true);
         showPasswordButton.setText(passwordState.isVisible() ? HIDE_PASSWORD_LABEL : SHOW_PASSWORD_LABEL);
-        this.showPasswordButton.setVisible(true);
-        this.showPasswordButton.setManaged(true);
-        this.copyPasswordButton.setVisible(true);
-        this.copyPasswordButton.setManaged(true);
+        showPasswordButton.setVisible(true);
+        showPasswordButton.setManaged(true);
+        copyPasswordButton.setVisible(true);
+        copyPasswordButton.setManaged(true);
         copyPasswordButton.setText(COPY_PASSWORD_LABEL);
     }
 
     private void bindTokenDetail() {
-        this.usernameRow.setVisible(false);
-        this.usernameRow.setManaged(false);
+        usernameRow.setVisible(false);
+        usernameRow.setManaged(false);
         Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
-        passwordLabel.setText(CredentialDetailController.TOKEN_LABEL + ":");
+        passwordLabel.setText(TOKEN_LABEL + ":");
         showPasswordButton.setText(passwordState.isVisible() ? HIDE_TOKEN_LABEL : SHOW_TOKEN_LABEL);
         copyPasswordButton.setText(COPY_TOKEN_LABEL);
-
     }
 
     private void bindNoteDetail() {
-        this.usernameRow.setVisible(false);
-        this.usernameRow.setManaged(false);
-        this.passwordRow.setVisible(false);
-        this.passwordRow.setManaged(false);
-        this.websiteRow.setVisible(false);
-        this.websiteRow.setManaged(false);
-        this.showPasswordButton.setVisible(false);
-        this.showPasswordButton.setManaged(false);
-        this.copyPasswordButton.setVisible(false);
-        this.copyPasswordButton.setManaged(false);
+        usernameRow.setVisible(false);
+        usernameRow.setManaged(false);
+        passwordRow.setVisible(false);
+        passwordRow.setManaged(false);
+        websiteRow.setVisible(false);
+        websiteRow.setManaged(false);
+        showPasswordButton.setVisible(false);
+        showPasswordButton.setManaged(false);
+        copyPasswordButton.setVisible(false);
+        copyPasswordButton.setManaged(false);
     }
 
     private static class PasswordState {
@@ -222,5 +231,4 @@ public class CredentialDetailController {
             return visible;
         }
     }
-
 }

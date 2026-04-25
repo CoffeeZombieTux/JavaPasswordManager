@@ -11,12 +11,19 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class TypesSwitcherController {
+
+    private static final Credential.CredentialType ACCOUNT = Credential.CredentialType.ACCOUNT;
+    private static final Credential.CredentialType TOKEN = Credential.CredentialType.TOKEN;
+    private static final Credential.CredentialType NOTE = Credential.CredentialType.NOTE;
+
     @FXML
     private Label accountsTotalCount;
     @FXML
     private Label tokensTotalCount;
     @FXML
     private Label notesCountLabel;
+
+    private Consumer<Credential.CredentialType> typeSelectedCallback = type -> {};
 
     @FXML
     private void handleTypeSelected(MouseEvent event) {
@@ -25,20 +32,13 @@ public class TypesSwitcherController {
         typeSelectedCallback.accept(type);
     }
 
-    private static final Credential.CredentialType ACCOUNT = Credential.CredentialType.ACCOUNT;
-    private static final Credential.CredentialType TOKEN = Credential.CredentialType.TOKEN;
-    private static final Credential.CredentialType NOTE = Credential.CredentialType.NOTE;
-
-    private Consumer<Credential.CredentialType> typeSelectedCallback = type -> {};
-
-
     public void bind(Map<Credential.CredentialType, Integer> totals) {
         accountsTotalCount.setText(Integer.toString(totals.get(ACCOUNT)));
         tokensTotalCount.setText(Integer.toString(totals.get(TOKEN)));
         notesCountLabel.setText(Integer.toString(totals.get(NOTE)));
     }
 
-    public void setTypeSelectedCallback(Consumer<Credential.CredentialType> setTypeSelectedCallback) {
-        this.typeSelectedCallback = Objects.requireNonNull(setTypeSelectedCallback);
+    public void setTypeSelectedCallback(Consumer<Credential.CredentialType> typeSelectedCallback) {
+        this.typeSelectedCallback = Objects.requireNonNull(typeSelectedCallback);
     }
 }

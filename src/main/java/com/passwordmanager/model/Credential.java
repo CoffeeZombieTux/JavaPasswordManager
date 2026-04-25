@@ -2,6 +2,7 @@ package com.passwordmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -18,26 +19,26 @@ public class Credential {
     private final UUID id;
     private final CredentialType type;
     private final String name;
-    private final String username;
+    private final @Nullable String username;
     private final String password;
-    private final String website;
-    private final String category;
+    private final @Nullable String website;
+    private final @Nullable String category;
     private final @Nullable String notes;
     private final Instant createdAt;
     private final Instant updatedAt;
 
     @JsonCreator
     public Credential(
-            @JsonProperty("id") UUID id,
-            @JsonProperty("type") CredentialType type,
-            @JsonProperty("name") String name,
-            @JsonProperty("username") String username,
-            @JsonProperty("password") String password,
-            @JsonProperty("website") String website,
-            @JsonProperty("category") String category,
+            @JsonProperty("id") @NotNull UUID id,
+            @JsonProperty("type") @NotNull CredentialType type,
+            @JsonProperty("name") @NotNull String name,
+            @JsonProperty("username") @Nullable String username,
+            @JsonProperty("password") @NotNull String password,
+            @JsonProperty("website") @Nullable String website,
+            @JsonProperty("category") @Nullable String category,
             @JsonProperty("notes") @Nullable String notes,
-            @JsonProperty("createdAt") Instant createdAt,
-            @JsonProperty("updatedAt") Instant updatedAt
+            @JsonProperty("createdAt") @NotNull Instant createdAt,
+            @JsonProperty("updatedAt") @NotNull Instant updatedAt
     ) {
         this.id = id;
         this.type = type;
@@ -51,31 +52,31 @@ public class Credential {
         this.updatedAt = updatedAt;
     }
 
-    public UUID getId() {
+    public @NotNull UUID getId() {
         return id;
     }
 
-    public CredentialType getType() {
+    public @NotNull CredentialType getType() {
         return type;
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
-    public String getUsername() {
+    public @Nullable String getUsername() {
         return username;
     }
 
-    public String getPassword() {
+    public @NotNull String getPassword() {
         return password;
     }
 
-    public String getWebsite() {
+    public @Nullable String getWebsite() {
         return website;
     }
 
-    public String getCategory() {
+    public @Nullable String getCategory() {
         return category;
     }
 
@@ -83,11 +84,11 @@ public class Credential {
         return notes;
     }
 
-    public Instant getCreatedAt() {
-        return this.createdAt;
+    public @NotNull Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public Instant getUpdatedAt() {
-        return this.updatedAt;
+    public @NotNull Instant getUpdatedAt() {
+        return updatedAt;
     }
 }

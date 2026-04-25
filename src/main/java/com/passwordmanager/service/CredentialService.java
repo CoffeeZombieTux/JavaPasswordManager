@@ -1,17 +1,16 @@
 package com.passwordmanager.service;
 
-import com.passwordmanager.repository.CredentialRepository;
 import com.passwordmanager.model.Credential;
+import com.passwordmanager.model.CredentialFilter;
+import com.passwordmanager.repository.CredentialRepository;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class CredentialService {
-    public static final String ALL_CATEGORIES = "All";
+
+    public static final String ALL_CATEGORIES = CredentialFilter.ALL_CATEGORIES;
 
     private final CredentialRepository repository;
 
@@ -19,43 +18,37 @@ public class CredentialService {
         this.repository = repository;
     }
 
-    /**
-     * Returns all stored credentials.
-     *
-     * @return unmodifiable list of credentials, never {@code null}
-     */
-    public List<Credential> findAll(Credential.CredentialType type) {
-        return repository.findAll(type);
+    public List<Credential> getFilteredData(CredentialFilter filter) {
+        return repository.filter(filter);
     }
 
-    /**
-     * Returns all stored credentials.
-     *
-     * @return unmodifiable list of credentials, never {@code null}
-     */
-    public Map<Credential.CredentialType, List<Credential>> findAll() {
-        Map<Credential.CredentialType, List<Credential>> data = new java.util.HashMap<>(Map.of());
-        for (Credential.CredentialType type :  Credential.CredentialType.values()) {
-            data.put(type, repository.findAll(type));
+    public Map<Credential.CredentialType, Integer> getTotals(CredentialFilter filter) {
+        Map<Credential.CredentialType, Integer> totals = new HashMap<>();
+        List<Credential> data = repository.filter(new CredentialFilter(filter.getSearchInput()));
+        for (Credential.CredentialType type : Credential.CredentialType.values()) {
+            totals.put(
+                    type,
+                    (int) data.stream().filter(c -> c.getType() == type).count()
+            );
         }
-        return data;
+        return totals;
     }
 
-
-    public List<Credential> filterByCategory(String category, Credential.CredentialType type) {
-        if (Objects.equals(category, ALL_CATEGORIES)) {
-            return findAll(type);
-        }
-        return repository.filterByCategoryAndType(type, category);
-    }
 
     /**
-     * Returns a list of unique categories in selected type.
+     * Returns a list of unique categories in selected data.
      *
      * @return unmodifiable list of categories, never {@code null}
      */
-    public List<String> findAllCategories(Credential.CredentialType type) {
-        return repository.findAllCategories(type, ALL_CATEGORIES);
+    public List<String> getCategories(List<Credential>data) {
+        List<String> categories = new ArrayList<>(data.stream()
+                .map(Credential::getCategory)
+                .filter(category -> category != null && !category.isBlank())
+                .distinct()
+                .sorted()
+                .toList());
+        categories.addFirst(ALL_CATEGORIES);
+        return List.copyOf(categories);
     }
 
     /**
@@ -103,7 +96,7 @@ public class CredentialService {
                 createNew ? Instant.now() : createdAt,
                 Instant.now()
         );
-        this.validate(c);
+        validate(c);
         return createNew ? repository.add(c) : repository.update(c);
     }
 
