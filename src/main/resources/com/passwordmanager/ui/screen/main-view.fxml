@@ -20,7 +20,7 @@
     <center>
         <VBox styleClass="center-panel">
             <HBox spacing="12" styleClass="stat-cards-container">
-                <fx:include fx:id="recordsCount" source="../component/records-counter-view.fxml"/>
+                <fx:include fx:id="typesSwitcher" source="../component/types/types-switcher-view.fxml"/>
             </HBox>
             <fx:include fx:id="credentialList" source="../component/list/credential-list-view.fxml" VBox.vgrow="ALWAYS"/>
         </VBox>

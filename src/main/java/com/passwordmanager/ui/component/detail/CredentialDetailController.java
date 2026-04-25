@@ -8,7 +8,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
@@ -20,25 +20,40 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.passwordmanager.model.Credential.CredentialType.NOTE;
+import static com.passwordmanager.model.Credential.CredentialType.TOKEN;
+
 public class CredentialDetailController {
 
     private static final String SHOW_PASSWORD_LABEL = "Show password";
     private static final String HIDE_PASSWORD_LABEL = "Hide password";
+    private static final String COPY_PASSWORD_LABEL = "Copy password";
+    private static final String SHOW_TOKEN_LABEL = "Show token";
+    private static final String HIDE_TOKEN_LABEL = "Hide token";
+    private static final String COPY_TOKEN_LABEL = "Copy token";
+    private static final String PASSWORD_LABEL = "Password";
+    private static final String TOKEN_LABEL = "Token";
 
     @FXML
     private Label name;
     @FXML
+    private HBox usernameRow;
+    @FXML
     private Label username;
     @FXML
+    private HBox passwordRow;
+    @FXML
     private Label password;
+    @FXML
+    private HBox websiteRow;
     @FXML
     private Label website;
     @FXML
     private Label category;
     @FXML
-    private Text notes;
+    private HBox notesRow;
     @FXML
-    private GridPane fieldsGrid;
+    private Text notes;
     @FXML
     private Label createdAt;
     @FXML
@@ -47,6 +62,8 @@ public class CredentialDetailController {
     private VBox detailPane;
     @FXML
     private Button showPasswordButton;
+    @FXML
+    private Button copyPasswordButton;
 
     private UUID id;
 
@@ -58,8 +75,8 @@ public class CredentialDetailController {
 
     @FXML
     public void initialize() {
-        // column 0 is 110px, hgap is 16px
-        notes.wrappingWidthProperty().bind(fieldsGrid.widthProperty().subtract(110 + 16));
+        // label is 110px, spacing is 16px
+        notes.wrappingWidthProperty().bind(notesRow.widthProperty().subtract(110 + 16));
     }
 
     public void setCredentialService(CredentialService credentialService) {
@@ -69,7 +86,7 @@ public class CredentialDetailController {
     public void bind(@NotNull Credential credential) {
         this.id = credential.getId();
         passwordState = new PasswordState(credential.getPassword());
-
+        this.bindSelectedTypeForm(credential.getType());
         name.setText(credential.getName());
         username.setText(credential.getUsername());
         password.setText(passwordState.getDisplayValue());
@@ -78,7 +95,6 @@ public class CredentialDetailController {
         notes.setText(credential.getNotes());
         createdAt.setText(credential.getCreatedAt().toString());
         updatedAt.setText(credential.getUpdatedAt().toString());
-        showPasswordButton.setText(passwordState.isVisible() ? HIDE_PASSWORD_LABEL : SHOW_PASSWORD_LABEL);
     }
 
     public void show() {
@@ -131,6 +147,56 @@ public class CredentialDetailController {
     public void setOnDeleteCallback(Runnable onDeleteCallback) {
         this.onDeleteCallback = Objects.requireNonNull(onDeleteCallback);
     }
+    private void bindSelectedTypeForm(Credential.CredentialType type) {
+        this.resetDetail();
+        switch (type) {
+            case TOKEN:
+                this.bindTokenDetail();
+                break;
+            case NOTE:
+                this.bindNoteDetail();
+                break;
+        }
+    }
+    private void resetDetail() {
+        Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
+        passwordLabel.setText(PASSWORD_LABEL + ":");
+        this.usernameRow.setVisible(true);
+        this.usernameRow.setManaged(true);
+        this.passwordRow.setVisible(true);
+        this.passwordRow.setManaged(true);
+        this.websiteRow.setVisible(true);
+        this.websiteRow.setManaged(true);
+        showPasswordButton.setText(passwordState.isVisible() ? HIDE_PASSWORD_LABEL : SHOW_PASSWORD_LABEL);
+        this.showPasswordButton.setVisible(true);
+        this.showPasswordButton.setManaged(true);
+        this.copyPasswordButton.setVisible(true);
+        this.copyPasswordButton.setManaged(true);
+        copyPasswordButton.setText(COPY_PASSWORD_LABEL);
+    }
+
+    private void bindTokenDetail() {
+        this.usernameRow.setVisible(false);
+        this.usernameRow.setManaged(false);
+        Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
+        passwordLabel.setText(CredentialDetailController.TOKEN_LABEL + ":");
+        showPasswordButton.setText(passwordState.isVisible() ? HIDE_TOKEN_LABEL : SHOW_TOKEN_LABEL);
+        copyPasswordButton.setText(COPY_TOKEN_LABEL);
+
+    }
+
+    private void bindNoteDetail() {
+        this.usernameRow.setVisible(false);
+        this.usernameRow.setManaged(false);
+        this.passwordRow.setVisible(false);
+        this.passwordRow.setManaged(false);
+        this.websiteRow.setVisible(false);
+        this.websiteRow.setManaged(false);
+        this.showPasswordButton.setVisible(false);
+        this.showPasswordButton.setManaged(false);
+        this.copyPasswordButton.setVisible(false);
+        this.copyPasswordButton.setManaged(false);
+    }
 
     private static class PasswordState {
         private final String value;
@@ -155,7 +221,6 @@ public class CredentialDetailController {
         public boolean isVisible() {
             return visible;
         }
-
     }
 
 }

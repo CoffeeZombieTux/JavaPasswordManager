@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.layout.HBox?>
+<HBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.passwordmanager.ui.component.types.TypesSwitcherController"
+      styleClass="stat-cards-container"
+      spacing="15">
+    <VBox styleClass="stat-card" userData="ACCOUNT" onMouseClicked="#handleTypeSelected">
+        <Label fx:id="accountsTotalCount" text="0" styleClass="stat-value"/>
+        <Label text="Accounts" styleClass="stat-label"/>
+    </VBox>
+    <VBox styleClass="stat-card" userData="TOKEN" onMouseClicked="#handleTypeSelected">
+        <Label fx:id="tokensTotalCount" text="0" styleClass="stat-value"/>
+        <Label text="Tokens" styleClass="stat-label"/>
+    </VBox>
+    <VBox styleClass="stat-card" userData="NOTE" onMouseClicked="#handleTypeSelected">
+        <Label fx:id="notesCountLabel" text="0" styleClass="stat-value"/>
+        <Label text="Notes" styleClass="stat-label"/>
+    </VBox>
+</HBox>
+

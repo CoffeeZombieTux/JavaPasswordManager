@@ -23,5 +23,5 @@ module com.passwordmanager {
     opens com.passwordmanager.ui.component.form to javafx.fxml;
     opens com.passwordmanager.ui.component.list to javafx.fxml;
     opens com.passwordmanager.ui.component.categories to javafx.fxml;
-    opens com.passwordmanager.ui.component to javafx.fxml;
+    opens com.passwordmanager.ui.component.types to javafx.fxml;
 }

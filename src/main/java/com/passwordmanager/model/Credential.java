@@ -9,7 +9,14 @@ import java.util.UUID;
 
 public class Credential {
 
+    public enum CredentialType {
+        ACCOUNT,
+        TOKEN,
+        NOTE
+    }
+
     private final UUID id;
+    private final CredentialType type;
     private final String name;
     private final String username;
     private final String password;
@@ -22,6 +29,7 @@ public class Credential {
     @JsonCreator
     public Credential(
             @JsonProperty("id") UUID id,
+            @JsonProperty("type") CredentialType type,
             @JsonProperty("name") String name,
             @JsonProperty("username") String username,
             @JsonProperty("password") String password,
@@ -32,6 +40,7 @@ public class Credential {
             @JsonProperty("updatedAt") Instant updatedAt
     ) {
         this.id = id;
+        this.type = type;
         this.name = name;
         this.username = username;
         this.password = password;
@@ -44,6 +53,10 @@ public class Credential {
 
     public UUID getId() {
         return id;
+    }
+
+    public CredentialType getType() {
+        return type;
     }
 
     public String getName() {

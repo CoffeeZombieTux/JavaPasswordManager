@@ -37,17 +37,26 @@ public class FileCredentialRepository implements CredentialRepository {
     }
 
     @Override
-    public synchronized List<Credential> filterByCategory(String category) {
+    public synchronized List<Credential> findAll(Credential.CredentialType type) {
         return data.stream()
+                .filter(credential -> credential.getType().equals(type))
+                .toList();
+    }
+
+    @Override
+    public synchronized List<Credential> filterByCategoryAndType(Credential.CredentialType type, String category) {
+        return data.stream()
+                .filter(credential -> credential.getType().equals(type))
                 .filter(credential -> credential.getCategory().equals(category))
                 .toList();
     }
 
     @Override
-    public synchronized List<String> findAllCategories(String defaultCategory) {
+    public synchronized List<String> findAllCategories(Credential.CredentialType type, String defaultCategory) {
         List<String> categories = new ArrayList<>(data.stream()
+                .filter(credential -> credential.getType().equals(type))
                 .map(Credential::getCategory)
-                .filter(c -> c != null && !c.isBlank())
+                .filter(category -> category != null && !category.isBlank())
                 .distinct()
                 .sorted()
                 .toList());
