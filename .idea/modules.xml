@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PasswordManager.iml" filepath="$PROJECT_DIR$/.idea/modules/PasswordManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PasswordManager.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PasswordManager.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PasswordManager.test.iml" filepath="$PROJECT_DIR$/.idea/modules/PasswordManager.test.iml" />
     </modules>
   </component>
 </project>
