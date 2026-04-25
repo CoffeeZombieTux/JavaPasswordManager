@@ -6,7 +6,6 @@ module com.passwordmanager {
     requires javafx.fxml;
     requires javafx.web;
     requires javafx.swing;
-    requires org.scenicview.scenicview;
     requires static org.jetbrains.annotations;
     requires java.sql;
 

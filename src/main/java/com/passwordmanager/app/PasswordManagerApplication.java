@@ -51,7 +51,6 @@ public class PasswordManagerApplication extends Application {
         stage.setMinWidth(1426);
         stage.setMinHeight(828);
         stage.show();
-//        ScenicView.show(scene);
     }
 
     private CryptoService showMasterPasswordDialog() throws IOException {
