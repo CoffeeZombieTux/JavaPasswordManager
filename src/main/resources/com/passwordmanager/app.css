@@ -260,7 +260,7 @@
 
 /* ---------- Summary Cards ---------- */
 .stat-cards-container {
-    -fx-padding: 0 0 16 0;
+    -fx-padding: 0 0 5 0;
 }
 
 .stat-card {
@@ -683,6 +683,38 @@
     -fx-fill: #f5f7fa;
     -fx-font-size: 14px;
     -fx-font-weight: 600;
+}
+
+/* ---------- Type Tab Switcher ---------- */
+.type-tab-bar {
+    -fx-border-color: transparent transparent rgba(255,255,255,0.08) transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-spacing: 0;
+    -fx-padding: 0 0 0 0;
+}
+
+.type-tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #a8b3c2;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 10 20 10 20;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+
+.type-tab:hover {
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-text-fill: #f5f7fa;
+}
+
+.type-tab:selected {
+    -fx-text-fill: #5b8cff;
+    -fx-border-color: transparent transparent #5b8cff transparent;
+    -fx-background-color: transparent;
 }
 
 /* ---------- Customizations and overrides ---------- */

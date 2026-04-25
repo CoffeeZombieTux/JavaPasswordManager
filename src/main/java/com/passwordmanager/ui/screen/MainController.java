@@ -8,20 +8,21 @@ import com.passwordmanager.ui.component.categories.CategoryListController;
 import com.passwordmanager.ui.component.form.AddCredentialFormController;
 import com.passwordmanager.ui.component.detail.CredentialDetailController;
 import com.passwordmanager.ui.component.list.CredentialListController;
-import com.passwordmanager.ui.component.RecordsCountController;
+import com.passwordmanager.ui.component.types.TypesSwitcherController;
 import com.passwordmanager.ui.component.topbar.TopBarActionsController;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class MainController {
 
     private final CredentialService credentialService;
-    private List<Credential> data;
+    private List<Credential> filteredData;
+    private Map<Credential.CredentialType, List<Credential>> allData;
     private String selectedCategory = CredentialService.ALL_CATEGORIES;
+    private Credential.CredentialType selectedType = Credential.CredentialType.ACCOUNT;
     private UUID selectedCredentialId;
 
     @FXML
@@ -31,7 +32,7 @@ public class MainController {
     private AddCredentialFormController addFormViewController;
 
     @FXML
-    private RecordsCountController recordsCountController;
+    private TypesSwitcherController typesSwitcherController;
 
     @FXML
     private CredentialListController credentialListController;
@@ -49,9 +50,12 @@ public class MainController {
 
     @FXML
     private void initialize() {
-        this.data = new ArrayList<>(credentialService.findAll());
+        Map<Credential.CredentialType, List<Credential>> allData = credentialService.findAll();
 
-        recordsCountController.bind(this.data.size());
+        this.filteredData = allData.get(selectedType);
+
+        typesSwitcherController.bind(countTotals(allData));
+        typesSwitcherController.setTypeSelectedCallback(this::filterCredentialsByType);
 
         topBarActionsController.setAddButtonCallback(this::showAddNewCredentialForm);
 
@@ -63,19 +67,21 @@ public class MainController {
         detailViewController.setOnEditCallback(this::showEditSelectedForm);
         detailViewController.setOnDeleteCallback(this::onCredentialDeleted);
 
-        categoryListController.bind(this.credentialService.findAllCategories());
+        categoryListController.bind(this.credentialService.findAllCategories(selectedType));
         categoryListController.setCategorySelectedCallback(this::filterCredentialsByCategory);
+        categoryListController.select(selectedCategory);
 
-        credentialListController.bind(this.data);
+        credentialListController.bind(this.filteredData);
         credentialListController.setCredentialSelectedCallback(this::showDetails);
         selectDefaultCredential();
     }
 
     private void reloadData() {
-        this.data = credentialService.filterByCategory(selectedCategory);
-        credentialListController.bind(data);
-        recordsCountController.bind(data.size());
-        categoryListController.bind(credentialService.findAllCategories());
+        this.allData = credentialService.findAll();
+        this.filteredData = credentialService.filterByCategory(selectedCategory, selectedType);
+        credentialListController.bind(filteredData);
+        typesSwitcherController.bind(countTotals(allData));
+        categoryListController.bind(credentialService.findAllCategories(selectedType));
         categoryListController.select(selectedCategory);
         selectDefaultCredential();
     }
@@ -87,8 +93,8 @@ public class MainController {
 
     private void onCredentialDeleted() {
         Credential deleted = credentialListController.getSelected();
-        int index = data.indexOf(deleted);
-        Credential previous = (index > 0) ? data.get(index - 1) : null;
+        int index = filteredData.indexOf(deleted);
+        Credential previous = (index > 0) ? filteredData.get(index - 1) : null;
         if (previous != null) {
             this.selectedCredentialId = previous.getId();
         }
@@ -125,7 +131,7 @@ public class MainController {
 
     private void selectDefaultCredential() {
         if (this.selectedCredentialId != null ) {
-            Credential selectedCredential = this.data
+            Credential selectedCredential = this.filteredData
                     .stream()
                     .filter(c -> c.getId().equals(this.selectedCredentialId))
                     .findFirst()
@@ -135,9 +141,9 @@ public class MainController {
                 return;
             }
         }
-        if (!this.data.isEmpty()) {
-            selectedCredentialId = this.data.getFirst().getId();
-            credentialListController.select(this.data.getFirst());
+        if (!this.filteredData.isEmpty()) {
+            selectedCredentialId = this.filteredData.getFirst().getId();
+            credentialListController.select(this.filteredData.getFirst());
             return;
         }
         selectedCredentialId = null;
@@ -148,7 +154,22 @@ public class MainController {
         if (category.equals(this.selectedCategory)) return;
         this.selectedCategory = category;
         reloadData();
-
     }
 
+    private void filterCredentialsByType(Credential.CredentialType type) {
+        if (type.equals(this.selectedType)) return;
+        this.selectedType = type;
+        this.selectedCategory = CredentialService.ALL_CATEGORIES;
+        reloadData();
+    }
+
+    private Map<Credential.CredentialType, Integer> countTotals(
+            Map<Credential.CredentialType, List<Credential>> allData
+    ) {
+        Map<Credential.CredentialType, Integer> totals = new java.util.HashMap<>(Map.of());
+        for (Map.Entry<Credential.CredentialType, List<Credential>> entry : allData.entrySet()) {
+            totals.put(entry.getKey(), entry.getValue().size());
+        }
+        return totals;
+    }
 }

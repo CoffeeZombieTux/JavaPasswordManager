@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,24 +24,38 @@ public class CredentialService {
      *
      * @return unmodifiable list of credentials, never {@code null}
      */
-    public List<Credential> findAll() {
-        return repository.findAll();
-    }
-
-    public List<Credential> filterByCategory(String category) {
-        if (Objects.equals(category, ALL_CATEGORIES)) {
-            return findAll();
-        }
-        return repository.filterByCategory(category);
+    public List<Credential> findAll(Credential.CredentialType type) {
+        return repository.findAll(type);
     }
 
     /**
-     * Returns a list of unique categories.
+     * Returns all stored credentials.
+     *
+     * @return unmodifiable list of credentials, never {@code null}
+     */
+    public Map<Credential.CredentialType, List<Credential>> findAll() {
+        Map<Credential.CredentialType, List<Credential>> data = new java.util.HashMap<>(Map.of());
+        for (Credential.CredentialType type :  Credential.CredentialType.values()) {
+            data.put(type, repository.findAll(type));
+        }
+        return data;
+    }
+
+
+    public List<Credential> filterByCategory(String category, Credential.CredentialType type) {
+        if (Objects.equals(category, ALL_CATEGORIES)) {
+            return findAll(type);
+        }
+        return repository.filterByCategoryAndType(type, category);
+    }
+
+    /**
+     * Returns a list of unique categories in selected type.
      *
      * @return unmodifiable list of categories, never {@code null}
      */
-    public List<String> findAllCategories() {
-        return repository.findAllCategories(ALL_CATEGORIES);
+    public List<String> findAllCategories(Credential.CredentialType type) {
+        return repository.findAllCategories(type, ALL_CATEGORIES);
     }
 
     /**
@@ -51,6 +66,7 @@ public class CredentialService {
      * is updated with a new {@code updatedAt} timestamp.
      *
      * @param id        the id of the credential to update, or {@code null} to create a new one
+     * @param type      the credential type
      * @param name      the credential name
      * @param username  the username
      * @param password  the password
@@ -62,6 +78,7 @@ public class CredentialService {
      */
     public Credential save(
             UUID id,
+            Credential.CredentialType type,
             String name,
             String username,
             String password,
@@ -76,6 +93,7 @@ public class CredentialService {
         }
         Credential c = new Credential(
                 id,
+                type,
                 name,
                 username,
                 password,
@@ -85,6 +103,7 @@ public class CredentialService {
                 createNew ? Instant.now() : createdAt,
                 Instant.now()
         );
+        this.validate(c);
         return createNew ? repository.add(c) : repository.update(c);
     }
 
@@ -95,5 +114,38 @@ public class CredentialService {
      */
     public void delete(@NotNull UUID id) {
         repository.deleteById(id);
+    }
+
+    /**
+     * Note requires name and notes
+     * Token requires name and token (password field)
+     * Account requires name, username and password
+     *
+     * @param credential object to validate
+     */
+    private void validate(Credential credential) {
+        if (credential.getName() == null || credential.getName().isBlank()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+
+        if (credential.getType() == Credential.CredentialType.NOTE) {
+            if (credential.getNotes() == null || credential.getNotes().isBlank()) {
+                throw new IllegalArgumentException("Notes is required");
+            }
+            return;
+        }
+
+        if (credential.getPassword() == null || credential.getPassword().isBlank()) {
+            String field = credential.getType() == Credential.CredentialType.ACCOUNT ? "Password" : "Token";
+            throw new IllegalArgumentException(field + " is required");
+        }
+
+        if (credential.getType() == Credential.CredentialType.TOKEN) {
+            return;
+        }
+
+        if (credential.getUsername() == null || credential.getUsername().isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
     }
 }

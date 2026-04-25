@@ -16,18 +16,26 @@ public interface CredentialRepository {
     List<Credential> findAll();
 
     /**
-     * Returns stored credentials by category.
+     * Returns all stored credentials of the given type.
+     *
+     * @param type the credential type to filter by, must not be {@code null}
+     * @return unmodifiable list of credentials matching {@code type}, never {@code null}
+     */
+    List<Credential> findAll(Credential.CredentialType type);
+
+    /**
+     * Returns stored credentials by category and type.
      *
      * @return unmodifiable list of credentials, never {@code null}
      */
-    List<Credential> filterByCategory(String category);
+    List<Credential> filterByCategoryAndType(Credential.CredentialType type, String category);
 
     /**
-     * Returns a list of unique categories.
+     * Returns a list of unique categories for selected type.
      *
      * @return unmodifiable list of categories, never {@code null}
      */
-    List<String> findAllCategories(String defaultCategory);
+    List<String> findAllCategories(Credential.CredentialType type, String defaultCategory);
 
     /**
      * Persists a new credential.
