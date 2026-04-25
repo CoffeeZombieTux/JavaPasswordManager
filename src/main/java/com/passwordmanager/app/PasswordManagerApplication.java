@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class PasswordManagerApplication extends Application {
+    private static final String APP_ICON_PATH = "/com/passwordmanager/icon.png";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -47,6 +49,7 @@ public class PasswordManagerApplication extends Application {
         );
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setTitle("Password Manager");
+        applyAppIcon(stage);
         stage.setScene(scene);
         stage.setMinWidth(1426);
         stage.setMinHeight(828);
@@ -67,6 +70,7 @@ public class PasswordManagerApplication extends Application {
         Stage dialog = new Stage();
         dialog.initStyle(StageStyle.TRANSPARENT);
         dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
         dialog.setScene(scene);
         dialog.sizeToScene();
         dialog.showAndWait();
@@ -77,5 +81,12 @@ public class PasswordManagerApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private void applyAppIcon(Stage stage) {
+        var iconUrl = PasswordManagerApplication.class.getResource(APP_ICON_PATH);
+        if (iconUrl != null) {
+            stage.getIcons().setAll(new Image(iconUrl.toExternalForm()));
+        }
     }
 }
