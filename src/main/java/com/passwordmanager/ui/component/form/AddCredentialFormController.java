@@ -8,6 +8,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import com.passwordmanager.ui.Dialogs;
+
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -132,9 +134,7 @@ public class AddCredentialFormController {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setHeaderText(null);
             alert.setContentText(e.getMessage());
-            alert.getDialogPane().getStylesheets().add(
-                    Objects.requireNonNull(getClass().getResource("/com/passwordmanager/app.css")).toExternalForm()
-            );
+            Dialogs.styleAsRounded(alert);
             alert.showAndWait();
         }
     }

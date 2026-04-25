@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.passwordmanager.crypto.CryptoService;
 import com.passwordmanager.model.Credential;
 import com.passwordmanager.model.CredentialFilter;
 import com.passwordmanager.storage.StoragePathResolver;
@@ -13,6 +14,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,9 +24,11 @@ public class FileCredentialRepository implements CredentialRepository {
 
     private final ObjectMapper objectMapper;
     private final Path filePath;
+    private final CryptoService cryptoService;
     private final List<Credential> data;
 
-    public FileCredentialRepository() {
+    public FileCredentialRepository(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
         filePath = StoragePathResolver.credentialsFilePath();
         objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
@@ -62,8 +66,7 @@ public class FileCredentialRepository implements CredentialRepository {
         UUID id = Objects.requireNonNull(updated.getId(), "id must not be null");
 
         for (int i = 0; i < data.size(); i++) {
-            Credential current = data.get(i);
-            if (current.getId().equals(id)) {
+            if (data.get(i).getId().equals(id)) {
                 data.set(i, updated);
                 writeToDisk(data);
                 return updated;
@@ -75,12 +78,12 @@ public class FileCredentialRepository implements CredentialRepository {
     @Override
     public synchronized void deleteById(UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        boolean removed = data.removeIf(credential -> credential.getId().equals(id));
+        boolean removed = data.removeIf(c -> c.getId().equals(id));
         if (removed) {
             writeToDisk(data);
             return;
         }
-        throw new IllegalArgumentException("Credential with id cannot be deleted: " + id);
+        throw new IllegalArgumentException("Credential with id does not exist: " + id);
     }
 
     private boolean matchesSearch(Credential c, String search) {
@@ -101,13 +104,15 @@ public class FileCredentialRepository implements CredentialRepository {
     private List<Credential> loadOrCreate() {
         if (Files.exists(filePath)) {
             try {
-                return objectMapper.readValue(filePath.toFile(), new TypeReference<>() {
-                });
+                byte[] encrypted = Files.readAllBytes(filePath);
+                byte[] json = cryptoService.decrypt(encrypted);
+                return objectMapper.readValue(json, new TypeReference<>() {});
             } catch (IOException e) {
                 throw new UncheckedIOException("Failed to read credentials: " + filePath, e);
+            } catch (GeneralSecurityException e) {
+                throw new RuntimeException("Failed to decrypt credentials: " + filePath, e);
             }
         }
-
         List<Credential> empty = List.of();
         writeToDisk(empty);
         return empty;
@@ -119,21 +124,20 @@ public class FileCredentialRepository implements CredentialRepository {
             if (parent != null) {
                 Files.createDirectories(parent);
             }
+            byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(credentials);
+            byte[] encrypted = cryptoService.encrypt(json);
 
             Path tempFile = filePath.resolveSibling(filePath.getFileName() + ".tmp");
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(tempFile.toFile(), credentials);
+            Files.write(tempFile, encrypted);
             try {
-                Files.move(
-                        tempFile,
-                        filePath,
-                        StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE
-                );
+                Files.move(tempFile, filePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException atomicMoveFailure) {
                 Files.move(tempFile, filePath, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write credentials: " + filePath, e);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException("Failed to encrypt credentials: " + filePath, e);
         }
     }
 }

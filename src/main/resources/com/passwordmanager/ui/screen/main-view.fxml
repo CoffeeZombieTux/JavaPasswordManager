@@ -1,35 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.passwordmanager.ui.screen.MainController"
-            styleClass="main-surface">
-    <top>
-        <fx:include fx:id="topBarActions" source="../component/topbar/topbar-view.fxml"/>
-    </top>
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.passwordmanager.ui.screen.MainController"
+           style="-fx-background-color: transparent; -fx-padding: 30;">
 
-    <left>
-        <VBox styleClass="sidebar">
-            <fx:include fx:id="categoryList" source="../component/categories/category-list-view.fxml"/>
-        </VBox>
-    </left>
+    <BorderPane fx:id="windowRoot" styleClass="main-surface">
+        <top>
+            <fx:include fx:id="topBarActions" source="../component/topbar/topbar-view.fxml"/>
+        </top>
 
-    <center>
-        <VBox styleClass="center-panel">
-            <HBox spacing="12" styleClass="stat-cards-container">
-                <fx:include fx:id="typesSwitcher" source="../component/types/types-switcher-view.fxml"/>
-            </HBox>
-            <fx:include fx:id="credentialList" source="../component/list/credential-list-view.fxml" VBox.vgrow="ALWAYS"/>
-        </VBox>
-    </center>
+        <left>
+            <VBox styleClass="sidebar">
+                <fx:include fx:id="categoryList" source="../component/categories/category-list-view.fxml"/>
+            </VBox>
+        </left>
 
-    <right>
-        <StackPane minWidth="600.0">
-            <fx:include fx:id="detailView" source="../component/detail/credential-detail-view.fxml"/>
-            <fx:include fx:id="addFormView" source="../component/form/add-credential-form-view.fxml"/>
-        </StackPane>
-    </right>
-</BorderPane>
+        <center>
+            <VBox styleClass="center-panel">
+                <HBox spacing="12" styleClass="stat-cards-container">
+                    <fx:include fx:id="typesSwitcher" source="../component/types/types-switcher-view.fxml"/>
+                </HBox>
+                <fx:include fx:id="credentialList" source="../component/list/credential-list-view.fxml" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </center>
+
+        <right>
+            <StackPane minWidth="600.0">
+                <fx:include fx:id="detailView" source="../component/detail/credential-detail-view.fxml"/>
+                <fx:include fx:id="addFormView" source="../component/form/add-credential-form-view.fxml"/>
+            </StackPane>
+        </right>
+    </BorderPane>
+
+</StackPane>

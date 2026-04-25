@@ -37,10 +37,29 @@
 }
 
 .main-surface {
-    -fx-background-color: rgba(15, 17, 21, 0.96);
+    -fx-background-color: #0f1115;
+    -fx-background-radius: 22;
     -fx-border-color: rgba(255, 255, 255, 0.08);
     -fx-border-radius: 22;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 28, 0.2, 0, 8);
+}
+
+.window-btn {
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+    -fx-text-fill: #a8b3c2;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 4 9 4 9;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.window-btn:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.13);
+}
+
+.window-btn-close:hover {
+    -fx-background-color: #ff5d73;
+    -fx-text-fill: white;
 }
 
 .sidebar {
@@ -557,11 +576,22 @@
 /* ---------- Dialog ---------- */
 .dialog-pane {
     -fx-background-color: #171d2a;
-    -fx-border-color: rgba(255,255,255,0.08);
-    -fx-padding: 18;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 16;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 28, 0.3, 0, 6);
 }
 
 .dialog-pane .header-panel {
+    -fx-background-color: transparent;
+}
+
+.dialog-pane .content {
+    -fx-background-color: transparent;
+}
+
+.dialog-pane .button-bar {
     -fx-background-color: transparent;
 }
 

@@ -22,6 +22,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.passwordmanager.ui.Dialogs;
+
 import static com.passwordmanager.model.Credential.CredentialType.NOTE;
 import static com.passwordmanager.model.Credential.CredentialType.TOKEN;
 
@@ -146,9 +148,7 @@ public class CredentialDetailController {
         alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
         alert.initOwner(detailPane.getScene().getWindow());
         alert.initModality(javafx.stage.Modality.WINDOW_MODAL);
-        alert.getDialogPane().getStylesheets().add(
-                Objects.requireNonNull(getClass().getResource("/com/passwordmanager/app.css")).toExternalForm()
-        );
+        Dialogs.styleAsRounded(alert);
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.YES) {
             credentialService.delete(id);

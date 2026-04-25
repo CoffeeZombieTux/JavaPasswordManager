@@ -1,8 +1,8 @@
 package com.passwordmanager.ui.screen;
 
+import com.passwordmanager.crypto.CryptoService;
 import com.passwordmanager.model.Credential;
 import com.passwordmanager.model.CredentialFilter;
-import com.passwordmanager.repository.CredentialRepository;
 import com.passwordmanager.repository.FileCredentialRepository;
 import com.passwordmanager.service.CredentialService;
 import com.passwordmanager.ui.component.categories.CategoryListController;
@@ -12,11 +12,16 @@ import com.passwordmanager.ui.component.list.CredentialListController;
 import com.passwordmanager.ui.component.types.TypesSwitcherController;
 import com.passwordmanager.ui.component.topbar.TopBarActionsController;
 import javafx.fxml.FXML;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.shape.Rectangle;
 
 import java.util.List;
 import java.util.UUID;
 
 public class MainController {
+
+    @FXML
+    private BorderPane windowRoot;
 
     @FXML
     private CredentialDetailController detailViewController;
@@ -41,9 +46,8 @@ public class MainController {
     private UUID selectedCredentialId;
     private CredentialFilter credentialFilter;
 
-    public MainController() {
-        CredentialRepository repository = new FileCredentialRepository();
-        credentialService = new CredentialService(repository);
+    public MainController(CryptoService cryptoService) {
+        credentialService = new CredentialService(new FileCredentialRepository(cryptoService));
         credentialFilter = new CredentialFilter();
     }
 
@@ -65,6 +69,13 @@ public class MainController {
         categoryListController.setCategorySelectedCallback(this::filterCredentialsByCategory);
 
         credentialListController.setCredentialSelectedCallback(this::showDetails);
+
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(44);
+        clip.setArcHeight(44);
+        clip.widthProperty().bind(windowRoot.widthProperty());
+        clip.heightProperty().bind(windowRoot.heightProperty());
+        windowRoot.setClip(clip);
 
         reloadData();
     }
