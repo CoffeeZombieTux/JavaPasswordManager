@@ -17,6 +17,8 @@ public class TopBarActionsController {
 
     private Runnable addButtonCallback = () -> {};
     private Consumer<String> searchButtonCallback = searchString -> {};
+    private Runnable exportCallback = () -> {};
+    private Runnable deleteVaultCallback = () -> {};
 
     private double dragOffsetX;
     private double dragOffsetY;
@@ -42,6 +44,14 @@ public class TopBarActionsController {
         this.searchButtonCallback = Objects.requireNonNull(searchButtonCallback);
     }
 
+    public void setExportCallback(Runnable exportCallback) {
+        this.exportCallback = Objects.requireNonNull(exportCallback);
+    }
+
+    public void setDeleteVaultCallback(Runnable deleteVaultCallback) {
+        this.deleteVaultCallback = Objects.requireNonNull(deleteVaultCallback);
+    }
+
     @FXML
     public void onAddSearchButtonClick() {
         searchButtonCallback.accept(searchInput.getText());
@@ -50,6 +60,16 @@ public class TopBarActionsController {
     @FXML
     public void onAddCredentialButtonClick() {
         addButtonCallback.run();
+    }
+
+    @FXML
+    public void onExportButtonClick() {
+        exportCallback.run();
+    }
+
+    @FXML
+    public void onDeleteVaultButtonClick() {
+        deleteVaultCallback.run();
     }
 
     @FXML

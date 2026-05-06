@@ -1,6 +1,6 @@
 # Password Manager
 
-A desktop password manager built with JavaFX 21. Credentials are encrypted with AES-256-GCM and protected by a master password.
+A desktop password manager built with JavaFX 21. Credentials are encrypted with AES-256-GCM and protected by a master password. Everything is stored locally — no servers, no cloud sync built in.
 
 ## Requirements
 
@@ -15,10 +15,9 @@ A desktop password manager built with JavaFX 21. Credentials are encrypted with 
 
 # Run
 ./gradlew run
-
-# Run tests
-./gradlew test
 ```
+
+> Note: `./gradlew build` may fail due to a Gradle–JUnit compatibility issue in the test task. Use `assemble` for a full build without tests.
 
 ## Building a .deb Installer (Ubuntu / Debian)
 
@@ -71,46 +70,45 @@ sudo dpkg -r passwordmanager
 
 ---
 
-## First Run
+## First Launch
 
-On first launch you will be prompted to create a master password (minimum 8 characters). This password encrypts the vault — it cannot be recovered if lost.
+On first launch the **Welcome screen** explains how the app works: it is fully local, how to export the encrypted vault for cloud backup, and how to restore from a backup. From here you can:
 
-On subsequent launches the same password unlocks the vault.
+- **Create New Vault** — set a master password (minimum 8 characters). This password encrypts the vault and cannot be recovered if lost.
+- **Import Existing Vault** — pick a `.vault` file exported from another device. You will need the master password that was used when that vault was created.
 
-## Vault Location
+On subsequent launches the master password dialog opens directly to unlock the existing vault.
 
-The encrypted vault file is stored at:
+## Backup & Export
 
-| Platform | Path |
-|----------|------|
-| Linux    | `~/.local/share/PasswordManager/credentials.vault` |
-| macOS    | `~/Library/Application Support/PasswordManager/credentials.vault` |
-| Windows  | `%APPDATA%\PasswordManager\credentials.vault` |
+Because the app has no built-in cloud sync, use **Export** (topbar button) to copy the encrypted vault file to any directory — for example, a folder synced by Google Drive, Dropbox, or another cloud service. The file stays encrypted, so it is safe to store in the cloud.
 
-## Resetting / Deleting the Vault
+The last used export directory is remembered and pre-filled on the next export.
 
-Deleting the vault permanently removes all stored credentials. There is no recovery.
+## Import
 
-**Linux / macOS**
+Import is only available on first launch when no vault exists. Select a `.vault` file previously exported from this app and enter the master password that was set when it was created.
 
-```bash
-rm ~/.local/share/PasswordManager/credentials.vault          # Linux
-rm ~/Library/Application\ Support/PasswordManager/credentials.vault  # macOS
-```
+## Deleting the Vault
 
-**Windows (PowerShell)**
+The **Delete Vault** button in the topbar opens a confirmation dialog. You must enter your master password to confirm. The action is permanent and cannot be undone — export a backup first if you want to keep your data.
 
-```powershell
-Remove-Item "$env:APPDATA\PasswordManager\credentials.vault"
-```
+After deletion the app closes. The next launch will show the Welcome screen.
 
-> If the file is owned by `root` (e.g. the app was accidentally run with `sudo`), fix ownership first:
+## Storage Files
+
+| Platform | Vault | Preferences |
+|----------|-------|-------------|
+| Linux    | `~/.local/share/PasswordManager/credentials.vault` | `~/.local/share/PasswordManager/preferences.json` |
+| macOS    | `~/Library/Application Support/PasswordManager/credentials.vault` | `~/Library/Application Support/PasswordManager/preferences.json` |
+| Windows  | `%APPDATA%\PasswordManager\credentials.vault` | `%APPDATA%\PasswordManager\preferences.json` |
+
+`preferences.json` stores non-sensitive settings (e.g. last export directory) in plain JSON.
+
+> If a vault file is owned by `root` (e.g. the app was accidentally run with `sudo`), fix ownership before deleting:
 > ```bash
 > sudo chown $USER ~/.local/share/PasswordManager/credentials.vault
 > ```
-> then delete it normally without `sudo`.
-
-After deletion the next launch will prompt you to create a new master password.
 
 ## Encryption
 
@@ -121,6 +119,36 @@ Vault encryption uses:
 - **File format:** `[16-byte salt][12-byte IV][GCM ciphertext + 128-bit tag]`
 
 A random salt is generated when the vault is first created, so each vault is unique even with the same master password.
+
+---
+
+## Architecture
+
+JavaFX desktop app (Java 21, JPMS modules) using an MVC pattern where a single `MainController` orchestrates the whole UI.
+
+**Layer flow:**
+```
+UI (FXML + Controller) → CredentialService → CredentialRepository → credentials.vault
+```
+
+**Key design points:**
+
+- `Credential` is an immutable record with a `@JsonCreator` constructor — all fields are `final`. Adding a field requires updating both the constructor signature and `CredentialService.save(...)`.
+- `FileCredentialRepository` is the only `CredentialRepository` implementation. It holds an in-memory `List<Credential>` and writes the entire list to disk atomically (temp file + move) on every mutation.
+- Storage paths are resolved by `StoragePathResolver` — exposes `credentialsFilePath()` and `preferencesFilePath()`, both under the same OS-specific app directory.
+- `AppPreferences` / `PreferencesStore` — plain Jackson POJO + static load/save helpers for non-sensitive user preferences. `com.passwordmanager.storage` is opened to `com.fasterxml.jackson.databind` in `module-info.java`.
+- `MainController` is instantiated by JavaFX/FXML and manually wires all sub-controllers in its `@FXML initialize()`. No DI framework — `FileCredentialRepository` is newed directly in `MainController`.
+- Each UI panel is a separate FXML + controller pair under `ui/component/`. The right-hand panel switches between `CredentialDetailController` (view) and `AddCredentialFormController` (create/edit) via `.show()` / `.hide()`.
+- Jackson (with `JavaTimeModule`) handles JSON serialisation of `Credential`. Any new model class that needs serialisation must be opened to `com.fasterxml.jackson.databind` in `module-info.java`.
+- `requires java.desktop` in `module-info.java` is needed for `java.awt.Toolkit.getLockingKeyState` (caps lock detection in the Delete Vault dialog).
+- `scenicview.jar` is a local lib in `libs/` used for UI debugging (`ScenicView.show(scene)` — commented out in code).
+
+**Startup flow:**
+1. If no vault file exists → `WelcomeController` is shown.
+   - "Create New Vault" → master password dialog (create mode).
+   - "Import Existing Vault" → FileChooser → file copied to app storage → master password dialog (unlock mode).
+   - Close → `Platform.exit()`.
+2. Vault exists → master password dialog directly.
 
 ## License
 

@@ -17,6 +17,9 @@
     <Button text="Search" styleClass="primary-button" onAction="#onAddSearchButtonClick"/>
     <Button text="+ Add" styleClass="primary-button" onAction="#onAddCredentialButtonClick"/>
     <Separator orientation="VERTICAL" style="-fx-padding: 0 6 0 6; -fx-opacity: 0.25;"/>
+    <Button text="Export" styleClass="ghost-button" onAction="#onExportButtonClick"/>
+    <Button text="Delete Vault" styleClass="danger-button" onAction="#onDeleteVaultButtonClick"/>
+    <Separator orientation="VERTICAL" style="-fx-padding: 0 6 0 6; -fx-opacity: 0.25;"/>
     <Button text="−" styleClass="window-btn" onAction="#onMinimizeButtonClick"/>
     <Button text="✕" styleClass="window-btn window-btn-close" onAction="#onCloseButtonClick"/>
 </HBox>

@@ -6,16 +6,34 @@ import com.passwordmanager.model.CredentialFilter;
 import com.passwordmanager.model.CredentialType;
 import com.passwordmanager.repository.FileCredentialRepository;
 import com.passwordmanager.service.CredentialService;
+import com.passwordmanager.storage.AppPreferences;
+import com.passwordmanager.storage.PreferencesStore;
+import com.passwordmanager.storage.StoragePathResolver;
+import com.passwordmanager.ui.Dialogs;
 import com.passwordmanager.ui.component.categories.CategoryListController;
 import com.passwordmanager.ui.component.form.AddCredentialFormController;
 import com.passwordmanager.ui.component.detail.CredentialDetailController;
 import com.passwordmanager.ui.component.list.CredentialListController;
 import com.passwordmanager.ui.component.types.TypesSwitcherController;
 import com.passwordmanager.ui.component.topbar.TopBarActionsController;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -59,6 +77,8 @@ public class MainController {
 
         topBarActionsController.setAddButtonCallback(this::showAddNewCredentialForm);
         topBarActionsController.setSearchButtonCallback(this::searchCredentials);
+        topBarActionsController.setExportCallback(this::handleExport);
+        topBarActionsController.setDeleteVaultCallback(this::handleDeleteVault);
 
         addFormViewController.setCredentialService(credentialService);
         addFormViewController.setCancelButtonCallback(this::closeForm);
@@ -174,5 +194,77 @@ public class MainController {
                 CredentialType.ACCOUNT
         );
         reloadData();
+    }
+
+    private void handleExport() {
+        AppPreferences prefs = PreferencesStore.load();
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("Select Export Directory");
+        if (prefs.getLastExportDirectory() != null) {
+            File initial = new File(prefs.getLastExportDirectory());
+            if (initial.isDirectory()) {
+                chooser.setInitialDirectory(initial);
+            }
+        }
+        Stage stage = (Stage) windowRoot.getScene().getWindow();
+        File dir = chooser.showDialog(stage);
+        if (dir == null) return;
+
+        try {
+            Path src = StoragePathResolver.credentialsFilePath();
+            Path dest = dir.toPath().resolve(src.getFileName());
+            Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING);
+
+            prefs.setLastExportDirectory(dir.getAbsolutePath());
+            PreferencesStore.save(prefs);
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Export Successful");
+            alert.setHeaderText(null);
+            alert.setContentText("Vault exported to:\n" + dest.toAbsolutePath());
+            Dialogs.styleAsRounded(alert);
+            alert.showAndWait();
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Export Failed");
+            alert.setHeaderText(null);
+            alert.setContentText("Could not export vault: " + e.getMessage());
+            Dialogs.styleAsRounded(alert);
+            alert.showAndWait();
+        }
+    }
+
+    private void handleDeleteVault() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    MainController.class.getResource("/com/passwordmanager/ui/screen/delete-vault-view.fxml")
+            );
+            Scene scene = new Scene(loader.load());
+            scene.setFill(Color.TRANSPARENT);
+            scene.getStylesheets().add(
+                    Objects.requireNonNull(
+                            MainController.class.getResource("/com/passwordmanager/app.css")
+                    ).toExternalForm()
+            );
+            Stage dialog = new Stage();
+            dialog.initStyle(StageStyle.TRANSPARENT);
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.initOwner(windowRoot.getScene().getWindow());
+            dialog.setScene(scene);
+            dialog.sizeToScene();
+            dialog.showAndWait();
+
+            DeleteVaultController controller = loader.getController();
+            if (controller.isDeleted()) {
+                Platform.exit();
+            }
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Could not open delete dialog: " + e.getMessage());
+            Dialogs.styleAsRounded(alert);
+            alert.showAndWait();
+        }
     }
 }

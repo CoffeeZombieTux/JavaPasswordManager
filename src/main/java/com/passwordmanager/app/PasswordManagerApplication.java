@@ -1,8 +1,10 @@
 package com.passwordmanager.app;
 
 import com.passwordmanager.crypto.CryptoService;
+import com.passwordmanager.storage.StoragePathResolver;
 import com.passwordmanager.ui.screen.MainController;
 import com.passwordmanager.ui.screen.MasterPasswordController;
+import com.passwordmanager.ui.screen.WelcomeController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Objects;
 
 @SuppressWarnings("java:S1075") // classpath resource paths are fixed by design, not configurable URIs
@@ -21,10 +24,19 @@ public class PasswordManagerApplication extends Application {
     private static final String APP_ICON_PATH = "/com/passwordmanager/icon.png";
     private static final String MAIN_VIEW_FXML = "/com/passwordmanager/ui/screen/main-view.fxml";
     private static final String MASTER_PASSWORD_VIEW_FXML = "/com/passwordmanager/ui/screen/master-password-view.fxml";
+    private static final String WELCOME_VIEW_FXML = "/com/passwordmanager/ui/screen/welcome-view.fxml";
     private static final String APP_CSS = "/com/passwordmanager/app.css";
 
     @Override
     public void start(Stage stage) throws IOException {
+        if (!Files.exists(StoragePathResolver.credentialsFilePath())) {
+            boolean proceed = showWelcomeDialog();
+            if (!proceed) {
+                Platform.exit();
+                return;
+            }
+        }
+
         CryptoService cryptoService = showMasterPasswordDialog();
         if (cryptoService == null) {
             Platform.exit();
@@ -58,6 +70,29 @@ public class PasswordManagerApplication extends Application {
         stage.setMinWidth(1426);
         stage.setMinHeight(828);
         stage.show();
+    }
+
+    private boolean showWelcomeDialog() throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                PasswordManagerApplication.class.getResource(WELCOME_VIEW_FXML)
+        );
+        Scene scene = new Scene(loader.load());
+        scene.setFill(Color.TRANSPARENT);
+        scene.getStylesheets().add(
+                Objects.requireNonNull(PasswordManagerApplication.class.getResource(APP_CSS))
+                        .toExternalForm()
+        );
+
+        Stage dialog = new Stage();
+        dialog.initStyle(StageStyle.TRANSPARENT);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        applyAppIcon(dialog);
+        dialog.setScene(scene);
+        dialog.sizeToScene();
+        dialog.showAndWait();
+
+        WelcomeController controller = loader.getController();
+        return controller.getResult() != WelcomeController.Action.CANCEL;
     }
 
     private CryptoService showMasterPasswordDialog() throws IOException {

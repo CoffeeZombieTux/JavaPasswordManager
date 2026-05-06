@@ -6,6 +6,7 @@ module com.passwordmanager {
     requires javafx.fxml;
     requires javafx.web;
     requires javafx.swing;
+    requires java.desktop;
     requires static org.jetbrains.annotations;
     exports com.passwordmanager.app;
     exports com.passwordmanager.model;
@@ -14,6 +15,7 @@ module com.passwordmanager {
     exports com.passwordmanager.storage;
 
     opens com.passwordmanager.model to com.fasterxml.jackson.databind;
+    opens com.passwordmanager.storage to com.fasterxml.jackson.databind;
     opens com.passwordmanager.ui.screen to javafx.fxml;
     opens com.passwordmanager.ui.component.detail to javafx.fxml;
     opens com.passwordmanager.ui.component.topbar to javafx.fxml;

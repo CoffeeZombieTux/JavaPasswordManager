@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.layout.Region?>
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.passwordmanager.ui.screen.DeleteVaultController"
+           style="-fx-background-color: transparent; -fx-padding: 20;">
+
+    <VBox fx:id="rootPane"
+          spacing="20"
+          prefWidth="420"
+          style="-fx-padding: 40 36 36 36;
+                 -fx-background-color: #0f141d;
+                 -fx-background-radius: 16;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.65), 28, 0.3, 0, 6);">
+
+        <VBox spacing="6">
+            <Label text="Delete Vault"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ff5d73;"/>
+            <Label text="This action is permanent and cannot be undone."
+                   style="-fx-text-fill: #a8b3c2; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <Label text="All your stored credentials will be permanently erased. Make sure you have exported a backup before proceeding if you want to keep your data."
+               wrapText="true"
+               style="-fx-text-fill: #f5f7fa; -fx-font-size: 13px;"/>
+
+        <Label fx:id="capsLockLabel"
+               text="⚠  CAPS LOCK IS ON"
+               style="-fx-text-fill: #f2b94b; -fx-font-size: 12px; -fx-font-weight: 700;"/>
+
+        <VBox spacing="6">
+            <Label text="Confirm with master password"
+                   style="-fx-text-fill: #a8b3c2; -fx-font-size: 12px;"/>
+            <PasswordField fx:id="passwordField"
+                           promptText="Enter master password…"
+                           styleClass="password-field"/>
+        </VBox>
+
+        <Label fx:id="errorLabel" text=""
+               style="-fx-text-fill: #ff5d73; -fx-font-size: 12px;"/>
+
+        <Region prefHeight="4"/>
+
+        <HBox spacing="12">
+            <Button text="Cancel"
+                    styleClass="ghost-button"
+                    HBox.hgrow="ALWAYS"
+                    maxWidth="Infinity"
+                    onAction="#onCancel"/>
+            <Button text="Delete Vault"
+                    styleClass="danger-button"
+                    HBox.hgrow="ALWAYS"
+                    maxWidth="Infinity"
+                    onAction="#onDelete"/>
+        </HBox>
+
+    </VBox>
+</StackPane>
