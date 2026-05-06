@@ -47,13 +47,13 @@ sudo apt install fakeroot binutils
 The installer is written to `build/jpackage/`:
 
 ```
-build/jpackage/passwordmanager_1.0.0_amd64.deb
+build/jpackage/passwordmanager_2.0.0_amd64.deb
 ```
 
 **Install on any Ubuntu / Debian machine:**
 
 ```bash
-sudo dpkg -i build/jpackage/passwordmanager_1.0.0_amd64.deb
+sudo dpkg -i build/jpackage/passwordmanager_2.0.0_amd64.deb
 ```
 
 The app will appear in the application menu under **Utilities** and can also be launched from a terminal:
