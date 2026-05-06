@@ -17,8 +17,8 @@ public class CredentialItemController {
     private Label usernameLabel;
 
     public void bind(Credential credential) {
-        titleLabel.setText(credential.getName());
-        usernameLabel.setText(credential.getUsername());
+        titleLabel.setText(credential.name());
+        usernameLabel.setText(credential.username());
     }
 
     public void setSelected(boolean selected) {

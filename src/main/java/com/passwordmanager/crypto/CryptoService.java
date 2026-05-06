@@ -3,7 +3,6 @@ package com.passwordmanager.crypto;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import java.security.*;
-import java.security.spec.*;
 import java.util.Arrays;
 
 public final class CryptoService {
@@ -16,6 +15,8 @@ public final class CryptoService {
     private static final String KEY_ALGORITHM = "AES";
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final String KDF_ALGORITHM = "PBKDF2WithHmacSHA256";
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final SecretKey key;
     private final byte[] salt;
@@ -31,7 +32,7 @@ public final class CryptoService {
      */
     public static CryptoService withNewSalt(char[] password) throws GeneralSecurityException {
         byte[] salt = new byte[SALT_LENGTH];
-        new SecureRandom().nextBytes(salt);
+        SECURE_RANDOM.nextBytes(salt);
         return new CryptoService(deriveKey(password, salt), salt);
     }
 
@@ -50,7 +51,7 @@ public final class CryptoService {
      */
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException {
         byte[] iv = new byte[IV_LENGTH];
-        new SecureRandom().nextBytes(iv);
+        SECURE_RANDOM.nextBytes(iv);
 
         Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BITS, iv));

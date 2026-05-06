@@ -40,7 +40,7 @@ public class FileCredentialRepository implements CredentialRepository {
     public synchronized List<Credential> filter(CredentialFilter filters) {
         return data.stream()
                 .filter(c -> matchesSearch(c, filters.getSearchInput()))
-                .filter(c -> filters.getType() == null || c.getType() == filters.getType())
+                .filter(c -> filters.getType() == null || c.type() == filters.getType())
                 .filter(c -> matchesCategory(c, filters.getCategory()))
                 .toList();
     }
@@ -48,9 +48,9 @@ public class FileCredentialRepository implements CredentialRepository {
     @Override
     public synchronized Credential add(Credential credential) {
         Objects.requireNonNull(credential, "credential must not be null");
-        UUID id = Objects.requireNonNull(credential.getId(), "credential.id must not be null");
+        UUID id = Objects.requireNonNull(credential.id(), "credential.id must not be null");
 
-        boolean exists = data.stream().anyMatch(c -> c.getId().equals(id));
+        boolean exists = data.stream().anyMatch(c -> c.id().equals(id));
         if (exists) {
             throw new IllegalArgumentException("Credential with id already exists: " + id);
         }
@@ -63,10 +63,10 @@ public class FileCredentialRepository implements CredentialRepository {
     @Override
     public synchronized Credential update(Credential updated) {
         Objects.requireNonNull(updated, "updated must not be null");
-        UUID id = Objects.requireNonNull(updated.getId(), "id must not be null");
+        UUID id = Objects.requireNonNull(updated.id(), "id must not be null");
 
         for (int i = 0; i < data.size(); i++) {
-            if (data.get(i).getId().equals(id)) {
+            if (data.get(i).id().equals(id)) {
                 data.set(i, updated);
                 writeToDisk(data);
                 return updated;
@@ -78,7 +78,7 @@ public class FileCredentialRepository implements CredentialRepository {
     @Override
     public synchronized void deleteById(UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        boolean removed = data.removeIf(c -> c.getId().equals(id));
+        boolean removed = data.removeIf(c -> c.id().equals(id));
         if (removed) {
             writeToDisk(data);
             return;
@@ -89,16 +89,16 @@ public class FileCredentialRepository implements CredentialRepository {
     private boolean matchesSearch(Credential c, String search) {
         if (search == null || search.isBlank()) return true;
         String q = search.toLowerCase();
-        if (c.getName().toLowerCase().contains(q)) return true;
-        if (c.getUsername() != null && c.getUsername().toLowerCase().contains(q)) return true;
-        if (c.getWebsite() != null && c.getWebsite().toLowerCase().contains(q)) return true;
-        return c.getNotes() != null && c.getNotes().toLowerCase().contains(q);
+        if (c.name().toLowerCase().contains(q)) return true;
+        if (c.username() != null && c.username().toLowerCase().contains(q)) return true;
+        if (c.website() != null && c.website().toLowerCase().contains(q)) return true;
+        return c.notes() != null && c.notes().toLowerCase().contains(q);
     }
 
     private boolean matchesCategory(Credential c, String category) {
         if (category == null || category.isBlank() || category.equals(CredentialFilter.ALL_CATEGORIES)) return true;
-        if (c.getCategory() == null || c.getCategory().isBlank()) return false;
-        return c.getCategory().equals(category);
+        if (c.category() == null || c.category().isBlank()) return false;
+        return c.category().equals(category);
     }
 
     private List<Credential> loadOrCreate() {
@@ -110,15 +110,15 @@ public class FileCredentialRepository implements CredentialRepository {
             } catch (IOException e) {
                 throw new UncheckedIOException("Failed to read credentials: " + filePath, e);
             } catch (GeneralSecurityException e) {
-                throw new RuntimeException("Failed to decrypt credentials: " + filePath, e);
+                throw new VaultException("Failed to decrypt credentials: " + filePath, e);
             }
         }
-        List<Credential> empty = List.of();
-        writeToDisk(empty);
-        return empty;
+        writeToDisk(List.of());
+        return List.of();
     }
 
     private void writeToDisk(List<Credential> credentials) {
+        Path tempFile = filePath.resolveSibling(filePath.getFileName() + ".tmp");
         try {
             Path parent = filePath.getParent();
             if (parent != null) {
@@ -127,17 +127,30 @@ public class FileCredentialRepository implements CredentialRepository {
             byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(credentials);
             byte[] encrypted = cryptoService.encrypt(json);
 
-            Path tempFile = filePath.resolveSibling(filePath.getFileName() + ".tmp");
             Files.write(tempFile, encrypted);
-            try {
-                Files.move(tempFile, filePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException atomicMoveFailure) {
-                Files.move(tempFile, filePath, StandardCopyOption.REPLACE_EXISTING);
-            }
+            moveTmpFile(tempFile, filePath);
         } catch (IOException e) {
+            deleteSilently(tempFile);
             throw new UncheckedIOException("Failed to write credentials: " + filePath, e);
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException("Failed to encrypt credentials: " + filePath, e);
+            deleteSilently(tempFile);
+            throw new VaultException("Failed to encrypt credentials: " + filePath, e);
+        }
+    }
+
+    private static void moveTmpFile(Path source, Path target) throws IOException {
+        try {
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException atomicMoveFailure) {
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private static void deleteSilently(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ignored) {
+            // best-effort cleanup — if the temp file can't be deleted, the OS will reclaim it eventually
         }
     }
 }

@@ -16,8 +16,12 @@ import javafx.stage.StageStyle;
 import java.io.IOException;
 import java.util.Objects;
 
+@SuppressWarnings("java:S1075") // classpath resource paths are fixed by design, not configurable URIs
 public class PasswordManagerApplication extends Application {
     private static final String APP_ICON_PATH = "/com/passwordmanager/icon.png";
+    private static final String MAIN_VIEW_FXML = "/com/passwordmanager/ui/screen/main-view.fxml";
+    private static final String MASTER_PASSWORD_VIEW_FXML = "/com/passwordmanager/ui/screen/master-password-view.fxml";
+    private static final String APP_CSS = "/com/passwordmanager/app.css";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -28,7 +32,7 @@ public class PasswordManagerApplication extends Application {
         }
 
         FXMLLoader mainLoader = new FXMLLoader(
-                PasswordManagerApplication.class.getResource("/com/passwordmanager/ui/screen/main-view.fxml")
+                PasswordManagerApplication.class.getResource(MAIN_VIEW_FXML)
         );
         mainLoader.setControllerFactory(clazz -> {
             if (clazz == MainController.class) {
@@ -37,14 +41,14 @@ public class PasswordManagerApplication extends Application {
             try {
                 return clazz.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Failed to instantiate controller: " + clazz.getName(), e);
+                throw new IllegalStateException("Failed to instantiate controller: " + clazz.getName(), e);
             }
         });
 
         Scene scene = new Scene(mainLoader.load(), 1426, 828);
         scene.setFill(Color.TRANSPARENT);
         scene.getStylesheets().add(
-                Objects.requireNonNull(PasswordManagerApplication.class.getResource("/com/passwordmanager/app.css"))
+                Objects.requireNonNull(PasswordManagerApplication.class.getResource(APP_CSS))
                         .toExternalForm()
         );
         stage.initStyle(StageStyle.TRANSPARENT);
@@ -58,12 +62,12 @@ public class PasswordManagerApplication extends Application {
 
     private CryptoService showMasterPasswordDialog() throws IOException {
         FXMLLoader loader = new FXMLLoader(
-                PasswordManagerApplication.class.getResource("/com/passwordmanager/ui/screen/master-password-view.fxml")
+                PasswordManagerApplication.class.getResource(MASTER_PASSWORD_VIEW_FXML)
         );
         Scene scene = new Scene(loader.load());
         scene.setFill(Color.TRANSPARENT);
         scene.getStylesheets().add(
-                Objects.requireNonNull(PasswordManagerApplication.class.getResource("/com/passwordmanager/app.css"))
+                Objects.requireNonNull(PasswordManagerApplication.class.getResource(APP_CSS))
                         .toExternalForm()
         );
 

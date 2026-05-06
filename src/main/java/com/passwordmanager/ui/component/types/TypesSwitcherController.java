@@ -1,6 +1,6 @@
 package com.passwordmanager.ui.component.types;
 
-import com.passwordmanager.model.Credential;
+import com.passwordmanager.model.CredentialType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -12,10 +12,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class TypesSwitcherController {
-
-    private static final Credential.CredentialType ACCOUNT = Credential.CredentialType.ACCOUNT;
-    private static final Credential.CredentialType TOKEN = Credential.CredentialType.TOKEN;
-    private static final Credential.CredentialType NOTE = Credential.CredentialType.NOTE;
 
     @FXML
     private VBox accountCard;
@@ -30,30 +26,32 @@ public class TypesSwitcherController {
     @FXML
     private Label notesCountLabel;
 
-    private Consumer<Credential.CredentialType> typeSelectedCallback = type -> {};
+    private static final String SELECTED_CLASS = "selected";
+
+    private Consumer<CredentialType> typeSelectedCallback = type -> {};
 
     @FXML
     private void handleTypeSelected(MouseEvent event) {
         VBox card = (VBox) event.getSource();
-        Credential.CredentialType type = Credential.CredentialType.valueOf((String) card.getUserData());
+        CredentialType type = CredentialType.valueOf((String) card.getUserData());
         typeSelectedCallback.accept(type);
     }
 
-    public void bind(Map<Credential.CredentialType, Integer> totals) {
-        accountsTotalCount.setText(Integer.toString(totals.get(ACCOUNT)));
-        tokensTotalCount.setText(Integer.toString(totals.get(TOKEN)));
-        notesCountLabel.setText(Integer.toString(totals.get(NOTE)));
+    public void bind(Map<CredentialType, Integer> totals) {
+        accountsTotalCount.setText(Integer.toString(totals.get(CredentialType.ACCOUNT)));
+        tokensTotalCount.setText(Integer.toString(totals.get(CredentialType.TOKEN)));
+        notesCountLabel.setText(Integer.toString(totals.get(CredentialType.NOTE)));
     }
 
-    public void select(Credential.CredentialType type) {
+    public void select(CredentialType type) {
         List<VBox> cards = List.of(accountCard, tokenCard, noteCard);
-        cards.forEach(c -> c.getStyleClass().remove("selected"));
-        if (type == ACCOUNT) accountCard.getStyleClass().add("selected");
-        else if (type == TOKEN) tokenCard.getStyleClass().add("selected");
-        else if (type == NOTE) noteCard.getStyleClass().add("selected");
+        cards.forEach(c -> c.getStyleClass().remove(SELECTED_CLASS));
+        if (type == CredentialType.ACCOUNT) accountCard.getStyleClass().add(SELECTED_CLASS);
+        else if (type == CredentialType.TOKEN) tokenCard.getStyleClass().add(SELECTED_CLASS);
+        else if (type == CredentialType.NOTE) noteCard.getStyleClass().add(SELECTED_CLASS);
     }
 
-    public void setTypeSelectedCallback(Consumer<Credential.CredentialType> typeSelectedCallback) {
+    public void setTypeSelectedCallback(Consumer<CredentialType> typeSelectedCallback) {
         this.typeSelectedCallback = Objects.requireNonNull(typeSelectedCallback);
     }
 }

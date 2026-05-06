@@ -1,6 +1,7 @@
 package com.passwordmanager.ui.component.form;
 
 import com.passwordmanager.model.Credential;
+import com.passwordmanager.model.CredentialType;
 import com.passwordmanager.service.CredentialService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -27,7 +28,13 @@ public class AddCredentialFormController {
     @FXML
     private HBox passwordRow;
     @FXML
-    private TextField password;
+    private Label passwordRowLabel;
+    @FXML
+    private PasswordField password;
+    @FXML
+    private TextField passwordPlain;
+    @FXML
+    private Button showPasswordButton;
     @FXML
     private HBox websiteRow;
     @FXML
@@ -43,7 +50,7 @@ public class AddCredentialFormController {
     @FXML
     private ToggleGroup typeGroup;
 
-    private Credential.CredentialType selectedType;
+    private CredentialType selectedType;
     private Credential editingCredential;
     private CredentialService credentialService;
 
@@ -58,6 +65,7 @@ public class AddCredentialFormController {
                 bind();
             }
         });
+        passwordPlain.textProperty().bindBidirectional(password.textProperty());
     }
 
     public void bind() {
@@ -73,15 +81,15 @@ public class AddCredentialFormController {
         reset();
         typeGroupContainer.setVisible(false);
         typeGroupContainer.setManaged(false);
-        selectedType = credential.getType();
+        selectedType = credential.type();
         bindSelectedTypeForm();
-        title.setText(credential.getName() + " (Edit)");
-        name.setText(credential.getName());
-        username.setText(credential.getUsername());
-        password.setText(credential.getPassword());
-        website.setText(credential.getWebsite());
-        category.setText(credential.getCategory());
-        notes.setText(credential.getNotes());
+        title.setText(credential.name() + " (Edit)");
+        name.setText(credential.name());
+        username.setText(credential.username());
+        password.setText(credential.password());
+        website.setText(credential.website());
+        category.setText(credential.category());
+        notes.setText(credential.notes());
     }
 
     public void reset() {
@@ -99,8 +107,12 @@ public class AddCredentialFormController {
         passwordRow.setManaged(true);
         websiteRow.setVisible(true);
         websiteRow.setManaged(true);
-        Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
-        passwordLabel.setText("Password:");
+        passwordRowLabel.setText("Password:");
+        password.setVisible(true);
+        password.setManaged(true);
+        passwordPlain.setVisible(false);
+        passwordPlain.setManaged(false);
+        showPasswordButton.setText("Show");
     }
 
     public void show() {
@@ -115,7 +127,7 @@ public class AddCredentialFormController {
 
     @FXML
     public void handleSaveCredential(ActionEvent actionEvent) {
-        UUID id = editingCredential != null ? editingCredential.getId() : null;
+        UUID id = editingCredential != null ? editingCredential.id() : null;
 
         try {
             Credential saved = credentialService.save(
@@ -127,7 +139,7 @@ public class AddCredentialFormController {
                     website.getText(),
                     category.getText(),
                     notes.getText(),
-                    editingCredential != null ? editingCredential.getCreatedAt() : null
+                    editingCredential != null ? editingCredential.createdAt() : null
             );
             onSavedCallback.accept(saved);
         } catch (IllegalArgumentException e) {
@@ -146,6 +158,16 @@ public class AddCredentialFormController {
         cancelButtonCallback.run();
     }
 
+    @FXML
+    public void handleShowPassword(ActionEvent actionEvent) {
+        boolean currentlyHidden = password.isVisible();
+        password.setVisible(!currentlyHidden);
+        password.setManaged(!currentlyHidden);
+        passwordPlain.setVisible(currentlyHidden);
+        passwordPlain.setManaged(currentlyHidden);
+        showPasswordButton.setText(currentlyHidden ? "Hide" : "Show");
+    }
+
     public void setCancelButtonCallback(Runnable cancelButtonCallback) {
         this.cancelButtonCallback = Objects.requireNonNull(cancelButtonCallback);
     }
@@ -159,27 +181,25 @@ public class AddCredentialFormController {
     }
 
     private void switchType() {
-        selectedType = Credential.CredentialType.valueOf(
+        selectedType = CredentialType.valueOf(
                 (String) typeGroup.getSelectedToggle().getUserData()
         );
     }
 
     private void bindSelectedTypeForm() {
-        switch (selectedType) {
-            case TOKEN:
-                bindTokenForm();
-                break;
-            case NOTE:
-                bindNoteForm();
-                break;
+        if (selectedType == CredentialType.TOKEN) {
+            bindTokenForm();
+            return;
+        }
+        if (selectedType == CredentialType.NOTE) {
+            bindNoteForm();
         }
     }
 
     private void bindTokenForm() {
         usernameRow.setVisible(false);
         usernameRow.setManaged(false);
-        Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
-        passwordLabel.setText("Token:");
+        passwordRowLabel.setText("Token:");
     }
 
     private void bindNoteForm() {

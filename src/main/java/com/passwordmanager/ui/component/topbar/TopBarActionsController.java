@@ -18,7 +18,8 @@ public class TopBarActionsController {
     private Runnable addButtonCallback = () -> {};
     private Consumer<String> searchButtonCallback = searchString -> {};
 
-    private double dragOffsetX, dragOffsetY;
+    private double dragOffsetX;
+    private double dragOffsetY;
 
     @FXML
     private void initialize() {

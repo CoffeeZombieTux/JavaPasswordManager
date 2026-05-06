@@ -2,6 +2,7 @@ package com.passwordmanager.service;
 
 import com.passwordmanager.model.Credential;
 import com.passwordmanager.model.CredentialFilter;
+import com.passwordmanager.model.CredentialType;
 import com.passwordmanager.repository.CredentialRepository;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,15 +23,11 @@ public class CredentialService {
         return repository.filter(filter);
     }
 
-    public Map<Credential.CredentialType, Integer> getTotals(CredentialFilter filter) {
-        Map<Credential.CredentialType, Integer> totals = new HashMap<>();
+    public Map<CredentialType, Integer> getTotals(CredentialFilter filter) {
         List<Credential> data = repository.filter(new CredentialFilter(filter.getSearchInput()));
-        for (Credential.CredentialType type : Credential.CredentialType.values()) {
-            totals.put(
-                    type,
-                    (int) data.stream().filter(c -> c.getType() == type).count()
-            );
-        }
+        Map<CredentialType, Integer> totals = new EnumMap<>(CredentialType.class);
+        for (CredentialType type : CredentialType.values()) totals.put(type, 0);
+        data.forEach(c -> totals.merge(c.type(), 1, Integer::sum));
         return totals;
     }
 
@@ -43,8 +40,8 @@ public class CredentialService {
     public List<String> getCategories(CredentialFilter filter) {
         List<Credential> data = repository.filter(new CredentialFilter(filter.getSearchInput()));
         List<String> categories = new ArrayList<>(data.stream()
-                .filter(credential -> credential.getType().equals(filter.getType()))
-                .map(Credential::getCategory)
+                .filter(credential -> credential.type().equals(filter.getType()))
+                .map(Credential::category)
                 .filter(category -> category != null && !category.isBlank())
                 .distinct()
                 .sorted()
@@ -71,9 +68,10 @@ public class CredentialService {
      * @param createdAt the original creation time; ignored when creating a new credential
      * @return the saved credential
      */
+    @SuppressWarnings("java:S107")
     public Credential save(
             UUID id,
-            Credential.CredentialType type,
+            CredentialType type,
             String name,
             String username,
             String password,
@@ -119,27 +117,27 @@ public class CredentialService {
      * @param credential object to validate
      */
     private void validate(Credential credential) {
-        if (credential.getName() == null || credential.getName().isBlank()) {
+        if (credential.name().isBlank()) {
             throw new IllegalArgumentException("Name is required");
         }
 
-        if (credential.getType() == Credential.CredentialType.NOTE) {
-            if (credential.getNotes() == null || credential.getNotes().isBlank()) {
+        if (credential.type() == CredentialType.NOTE) {
+            if (credential.notes() == null || credential.notes().isBlank()) {
                 throw new IllegalArgumentException("Notes is required");
             }
             return;
         }
 
-        if (credential.getPassword() == null || credential.getPassword().isBlank()) {
-            String field = credential.getType() == Credential.CredentialType.ACCOUNT ? "Password" : "Token";
+        if (credential.password().isBlank()) {
+            String field = credential.type() == CredentialType.ACCOUNT ? "Password" : "Token";
             throw new IllegalArgumentException(field + " is required");
         }
 
-        if (credential.getType() == Credential.CredentialType.TOKEN) {
+        if (credential.type() == CredentialType.TOKEN) {
             return;
         }
 
-        if (credential.getUsername() == null || credential.getUsername().isBlank()) {
+        if (credential.username() == null || credential.username().isBlank()) {
             throw new IllegalArgumentException("Username is required");
         }
     }

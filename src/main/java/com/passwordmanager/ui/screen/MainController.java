@@ -3,6 +3,7 @@ package com.passwordmanager.ui.screen;
 import com.passwordmanager.crypto.CryptoService;
 import com.passwordmanager.model.Credential;
 import com.passwordmanager.model.CredentialFilter;
+import com.passwordmanager.model.CredentialType;
 import com.passwordmanager.repository.FileCredentialRepository;
 import com.passwordmanager.service.CredentialService;
 import com.passwordmanager.ui.component.categories.CategoryListController;
@@ -16,6 +17,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class MainController {
@@ -91,7 +93,7 @@ public class MainController {
     }
 
     private void onCredentialSaved(Credential saved) {
-        selectedCredentialId = saved.getId();
+        selectedCredentialId = saved.id();
         reloadData();
     }
 
@@ -100,13 +102,13 @@ public class MainController {
         int index = data.indexOf(deleted);
         Credential previous = (index > 0) ? data.get(index - 1) : null;
         if (previous != null) {
-            selectedCredentialId = previous.getId();
+            selectedCredentialId = previous.id();
         }
         reloadData();
     }
 
     private void showDetails(Credential selected) {
-        selectedCredentialId = selected.getId();
+        selectedCredentialId = selected.id();
         detailViewController.bind(selected);
         addFormViewController.hide();
         detailViewController.show();
@@ -136,7 +138,7 @@ public class MainController {
     private void selectDefaultCredential() {
         if (selectedCredentialId != null) {
             Credential selectedCredential = data.stream()
-                    .filter(c -> c.getId().equals(selectedCredentialId))
+                    .filter(c -> c.id().equals(selectedCredentialId))
                     .findFirst()
                     .orElse(null);
             if (selectedCredential != null) {
@@ -145,7 +147,7 @@ public class MainController {
             }
         }
         if (!data.isEmpty()) {
-            selectedCredentialId = data.getFirst().getId();
+            selectedCredentialId = data.getFirst().id();
             credentialListController.select(data.getFirst());
             return;
         }
@@ -154,15 +156,14 @@ public class MainController {
     }
 
     private void filterCredentialsByCategory(String category) {
-        if (category.equals(credentialFilter.getCategory())) return;
-        credentialFilter.setCategory(category);
+        if (Objects.equals(category, credentialFilter.getCategory())) return;
+        credentialFilter = credentialFilter.withCategory(category);
         reloadData();
     }
 
-    private void filterCredentialsByType(Credential.CredentialType type) {
-        if (type.equals(credentialFilter.getType())) return;
-        credentialFilter.setType(type);
-        credentialFilter.setCategory(CredentialService.ALL_CATEGORIES);
+    private void filterCredentialsByType(CredentialType type) {
+        if (Objects.equals(type, credentialFilter.getType())) return;
+        credentialFilter = credentialFilter.withType(type).withCategory(CredentialService.ALL_CATEGORIES);
         reloadData();
     }
 
@@ -170,7 +171,7 @@ public class MainController {
         credentialFilter = new CredentialFilter(
                 search,
                 CredentialService.ALL_CATEGORIES,
-                Credential.CredentialType.ACCOUNT
+                CredentialType.ACCOUNT
         );
         reloadData();
     }

@@ -2,27 +2,27 @@ package com.passwordmanager.model;
 
 import org.jetbrains.annotations.Nullable;
 
-public class CredentialFilter {
+public final class CredentialFilter {
 
     public static final String ALL_CATEGORIES = "All";
 
-    private Credential.CredentialType type;
-    private @Nullable String category;
+    private final @Nullable CredentialType type;
+    private final @Nullable String category;
     private final @Nullable String searchInput;
 
     public CredentialFilter() {
-        type = Credential.CredentialType.ACCOUNT;
-        category = ALL_CATEGORIES;
-        searchInput = null;
+        this.type = CredentialType.ACCOUNT;
+        this.category = ALL_CATEGORIES;
+        this.searchInput = null;
     }
 
     public CredentialFilter(@Nullable String searchInput) {
-        type = null;
-        category = null;
+        this.type = null;
+        this.category = null;
         this.searchInput = searchInput;
     }
 
-    public CredentialFilter(@Nullable String searchInput, @Nullable String category, Credential.CredentialType type) {
+    public CredentialFilter(@Nullable String searchInput, @Nullable String category, @Nullable CredentialType type) {
         this.type = type;
         this.category = category;
         this.searchInput = searchInput;
@@ -32,19 +32,19 @@ public class CredentialFilter {
         return category;
     }
 
-    public void setCategory(@Nullable String category) {
-        this.category = category;
-    }
-
     public @Nullable String getSearchInput() {
         return searchInput;
     }
 
-    public Credential.CredentialType getType() {
+    public @Nullable CredentialType getType() {
         return type;
     }
 
-    public void setType(Credential.CredentialType type) {
-        this.type = type;
+    public CredentialFilter withType(@Nullable CredentialType type) {
+        return new CredentialFilter(searchInput, category, type);
+    }
+
+    public CredentialFilter withCategory(@Nullable String category) {
+        return new CredentialFilter(searchInput, category, type);
     }
 }

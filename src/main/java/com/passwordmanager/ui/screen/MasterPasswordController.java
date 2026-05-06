@@ -33,7 +33,8 @@ public class MasterPasswordController {
 
     private final boolean firstRun = !Files.exists(StoragePathResolver.credentialsFilePath());
     private CryptoService cryptoService;
-    private double dragOffsetX, dragOffsetY;
+    private double dragOffsetX;
+    private double dragOffsetY;
 
     @FXML
     private void initialize() {
@@ -94,7 +95,7 @@ public class MasterPasswordController {
             cryptoService = CryptoService.withNewSalt(password);
             close();
         } catch (GeneralSecurityException e) {
-            errorLabel.setText("Failed to create vault: " + e.getMessage());
+            errorLabel.setText("Failed to create vault.");
         } finally {
             Arrays.fill(password, '\0');
             Arrays.fill(confirm, '\0');
@@ -117,7 +118,7 @@ public class MasterPasswordController {
             errorLabel.setText("Wrong password.");
             passwordField.clear();
         } catch (GeneralSecurityException | IOException e) {
-            errorLabel.setText("Failed to unlock: " + e.getMessage());
+            errorLabel.setText("Failed to unlock vault.");
         } finally {
             Arrays.fill(password, '\0');
         }

@@ -67,7 +67,7 @@ public class CredentialListController {
                 view = loader.load();
                 controller = loader.getController();
             } catch (IOException e) {
-                throw new RuntimeException("Failed to load credential-item.fxml", e);
+                throw new IllegalStateException("Failed to load credential-item.fxml", e);
             }
         }
 

@@ -1,6 +1,7 @@
 package com.passwordmanager.ui.component.detail;
 
 import com.passwordmanager.model.Credential;
+import com.passwordmanager.model.CredentialType;
 import com.passwordmanager.service.CredentialService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,13 +22,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.passwordmanager.ui.Dialogs;
-
-import static com.passwordmanager.model.Credential.CredentialType.NOTE;
-import static com.passwordmanager.model.Credential.CredentialType.TOKEN;
+import javafx.application.Platform;
 
 public class CredentialDetailController {
+
+    private static final ScheduledExecutorService CLIPBOARD_CLEANER = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "clipboard-cleaner");
+        t.setDaemon(true);
+        return t;
+    });
 
     private static final String SHOW_PASSWORD_LABEL = "Show password";
     private static final String HIDE_PASSWORD_LABEL = "Hide password";
@@ -68,6 +76,8 @@ public class CredentialDetailController {
     @FXML
     private VBox detailPane;
     @FXML
+    private Label passwordRowLabel;
+    @FXML
     private Button showPasswordButton;
     @FXML
     private Button copyPasswordButton;
@@ -98,17 +108,17 @@ public class CredentialDetailController {
     }
 
     public void bind(@NotNull Credential credential) {
-        id = credential.getId();
-        passwordState = new PasswordState(credential.getPassword());
-        bindSelectedTypeForm(credential.getType());
-        name.setText(credential.getName());
-        username.setText(credential.getUsername());
+        id = credential.id();
+        passwordState = new PasswordState(credential.password());
+        bindSelectedTypeForm(credential.type());
+        name.setText(credential.name());
+        username.setText(credential.username());
         password.setText(passwordState.getDisplayValue());
-        website.setText(credential.getWebsite());
-        category.setText(credential.getCategory());
-        notes.setText(credential.getNotes());
-        createdAt.setText(DATE_FORMATTER.format(credential.getCreatedAt()));
-        updatedAt.setText(DATE_FORMATTER.format(credential.getUpdatedAt()));
+        website.setText(credential.website());
+        category.setText(credential.category());
+        notes.setText(credential.notes());
+        createdAt.setText(DATE_FORMATTER.format(credential.createdAt()));
+        updatedAt.setText(DATE_FORMATTER.format(credential.updatedAt()));
     }
 
     public void show() {
@@ -132,6 +142,10 @@ public class CredentialDetailController {
     public void handleCopyPassword(ActionEvent actionEvent) {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(new StringSelection(passwordState.getValue()), null);
+        CLIPBOARD_CLEANER.schedule(
+                () -> Platform.runLater(() -> clipboard.setContents(new StringSelection(""), null)),
+                30, TimeUnit.SECONDS
+        );
     }
 
     @FXML
@@ -156,21 +170,19 @@ public class CredentialDetailController {
         }
     }
 
-    private void bindSelectedTypeForm(Credential.CredentialType type) {
+    private void bindSelectedTypeForm(CredentialType type) {
         resetDetail();
-        switch (type) {
-            case TOKEN:
-                bindTokenDetail();
-                break;
-            case NOTE:
-                bindNoteDetail();
-                break;
+        if (type == CredentialType.TOKEN) {
+            bindTokenDetail();
+            return;
+        }
+        if (type == CredentialType.NOTE) {
+            bindNoteDetail();
         }
     }
 
     private void resetDetail() {
-        Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
-        passwordLabel.setText(PASSWORD_LABEL + ":");
+        passwordRowLabel.setText(PASSWORD_LABEL + ":");
         usernameRow.setVisible(true);
         usernameRow.setManaged(true);
         passwordRow.setVisible(true);
@@ -188,8 +200,7 @@ public class CredentialDetailController {
     private void bindTokenDetail() {
         usernameRow.setVisible(false);
         usernameRow.setManaged(false);
-        Label passwordLabel = (Label) passwordRow.getChildren().getFirst();
-        passwordLabel.setText(TOKEN_LABEL + ":");
+        passwordRowLabel.setText(TOKEN_LABEL + ":");
         showPasswordButton.setText(passwordState.isVisible() ? HIDE_TOKEN_LABEL : SHOW_TOKEN_LABEL);
         copyPasswordButton.setText(COPY_TOKEN_LABEL);
     }
