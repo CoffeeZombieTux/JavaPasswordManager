@@ -4,7 +4,7 @@ A desktop password manager built with JavaFX 21. Credentials are encrypted with 
 
 ## Requirements
 
-- Java 21+
+- Java 21
 - Gradle (wrapper included)
 
 ## Build & Run

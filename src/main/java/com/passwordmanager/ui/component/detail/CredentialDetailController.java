@@ -3,6 +3,7 @@ package com.passwordmanager.ui.component.detail;
 import com.passwordmanager.model.Credential;
 import com.passwordmanager.model.CredentialType;
 import com.passwordmanager.service.CredentialService;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -91,8 +92,17 @@ public class CredentialDetailController {
 
     @FXML
     public void initialize() {
-        // label is 110px, spacing is 16px
-        notes.wrappingWidthProperty().bind(notesRow.widthProperty().subtract(110 + 16));
+        notes.wrappingWidthProperty().bind(
+                notesRow.widthProperty()
+                        .subtract(passwordRowLabel.widthProperty())
+                        .subtract(notesRow.spacingProperty())
+                        .subtract(
+                                Bindings.createDoubleBinding(
+                                    () -> notesRow.getPadding().getLeft() + notesRow.getPadding().getRight(),
+                                        notesRow.paddingProperty()
+                                )
+                        )
+        );
     }
 
     public void setCredentialService(CredentialService credentialService) {

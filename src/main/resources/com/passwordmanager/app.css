@@ -457,6 +457,7 @@
 .text-area .content {
     -fx-background-color: transparent;
     -fx-background-radius: 12;
+    -fx-padding: 0;
 }
 
 /* ---------- ComboBox ---------- */
